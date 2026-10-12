@@ -202,23 +202,13 @@
     .idle .progress { opacity: .35; }
     .hidden { display: none !important; }
     .history {
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px solid #232838;
-    }
-    .history-title {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-top: 12px;
     }
     .history-list {
       list-style: none;
       margin: 0;
       padding: 0;
-      max-height: 210px;
+      max-height: 240px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -360,6 +350,23 @@
     .resume-btn:hover:not(:disabled) {
       background: rgba(82, 181, 75, .26);
     }
+    .skip-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .skip-btn {
+      min-height: 40px;
+      padding: 8px 6px;
+      font-size: 13.5px;
+      font-variant-numeric: tabular-nums;
+      border: 1px solid rgba(168, 130, 255, .38);
+      background: rgba(168, 130, 255, .13);
+      color: #cbb5ff;
+    }
+    .skip-btn:hover:not(:disabled) {
+      background: rgba(168, 130, 255, .24);
+    }
     .action-btn:disabled {
       opacity: .42;
       cursor: not-allowed;
@@ -367,21 +374,85 @@
       background: #1f232e;
       color: var(--muted);
     }
-    .chat {
+    .tabs-bar {
       margin-top: 18px;
       padding-top: 16px;
       border-top: 1px solid #232838;
+      display: flex;
+      gap: 8px;
     }
-    .chat-title {
+    .tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #252b3b;
+      background: #12151e;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: #181c28;
+    }
+    .tab-btn.active {
+      color: #6fd368;
+      border-color: rgba(82, 181, 75, .45);
+      background: rgba(82, 181, 75, .14);
+    }
+    .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 18px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .08);
       color: var(--muted);
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+    .tab-btn.active .tab-count {
+      background: rgba(82, 181, 75, .24);
+      color: #9be895;
+    }
+    .chat, .history {
+      margin-top: 12px;
+    }
+    .chat-name-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 8px 11px;
+      border-radius: 10px;
+      background: #11141b;
+      border: 1px solid #252b3b;
+    }
+    .chat-name-label {
+      flex: none;
+      color: #9ba3b5;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .chat-name-row .viewer-name {
+      flex: 1;
+      min-width: 0;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #282e3f;
+      background: #171b24;
+      font-size: 16px;
     }
     .chat-list {
       max-height: 240px;
@@ -627,11 +698,16 @@
     </div>
 
     <div class="controls">
-      <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Your name (optional)" />
       <div class="btn-row">
         <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
         <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
         <button id="resume-btn" class="action-btn resume-btn" type="button" disabled>▶ Resume</button>
+      </div>
+      <div id="skip-row" class="skip-row">
+        <button class="action-btn skip-btn" type="button" data-skip="-10" disabled>⏪ -10s</button>
+        <button class="action-btn skip-btn" type="button" data-skip="-5" disabled>⏪ -5s</button>
+        <button class="action-btn skip-btn" type="button" data-skip="5" disabled>+5s ⏩</button>
+        <button class="action-btn skip-btn" type="button" data-skip="10" disabled>+10s ⏩</button>
       </div>
       <form id="seek-form" class="seek-row" autocomplete="off">
         <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
@@ -644,8 +720,22 @@
       <span id="conn"></span>
     </div>
 
+    <div class="tabs-bar" role="tablist">
+      <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
+        <span>💬 Live Chat</span>
+        <span id="chat-count" class="tab-count">0</span>
+      </button>
+      <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
+        <span>📜 Recent Activity</span>
+        <span id="history-count" class="tab-count">0</span>
+      </button>
+    </div>
+
     <section id="chat-section" class="chat">
-      <div class="chat-title"><span>💬 Live Chat</span></div>
+      <div class="chat-name-row">
+        <label class="chat-name-label" for="viewer-name">👤 Your name</label>
+        <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Enter your name (optional)" />
+      </div>
       <div id="chat-list" class="chat-list">
         <div class="chat-empty">No messages yet — say hi!</div>
       </div>
@@ -667,7 +757,6 @@
     </section>
 
     <section id="history-section" class="history hidden">
-      <div class="history-title">Recent Activity</div>
       <ul id="history-list" class="history-list"></ul>
     </section>
   </main>
@@ -682,6 +771,7 @@
 
     const $ = (id) => document.getElementById(id);
     const card = $('card');
+    const skipBtns = Array.from(document.querySelectorAll('.skip-btn'));
 
     let state = null;
     let history = [];
@@ -691,6 +781,21 @@
     let connected = false;
     let isScrubbing = false;
     let scrubTime = 0;
+    let activeTab = 'chat';
+
+    function switchTab(tab) {
+      activeTab = tab === 'history' ? 'history' : 'chat';
+      const isChat = activeTab === 'chat';
+      $('tab-btn-chat').classList.toggle('active', isChat);
+      $('tab-btn-chat').setAttribute('aria-selected', String(isChat));
+      $('tab-btn-history').classList.toggle('active', !isChat);
+      $('tab-btn-history').setAttribute('aria-selected', String(!isChat));
+      $('chat-section').classList.toggle('hidden', !isChat);
+      $('history-section').classList.toggle('hidden', isChat);
+    }
+
+    $('tab-btn-chat').addEventListener('click', () => switchTab('chat'));
+    $('tab-btn-history').addEventListener('click', () => switchTab('history'));
 
     function fmt(totalSeconds) {
       if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return '–:––';
@@ -831,14 +936,15 @@
     }
 
     function renderHistory(now) {
-      const section = $('history-section');
       const list = $('history-list');
+      $('history-count').textContent = String(history ? history.length : 0);
       if (!history || history.length === 0) {
-        section.classList.add('hidden');
-        list.replaceChildren();
+        if (list.dataset.sig !== 'empty') {
+          list.dataset.sig = 'empty';
+          list.innerHTML = '<li class="chat-empty">No recent activity yet.</li>';
+        }
         return;
       }
-      section.classList.remove('hidden');
 
       // Rebuild items if count or newest ID/timestamp changed; otherwise just update relative times
       const sig = history.map((h) => `${h.id}:${h.timestamp}:${h.to ?? ''}`).join('|');
@@ -894,6 +1000,7 @@
 
     function renderChat() {
       const list = $('chat-list');
+      $('chat-count').textContent = String(messages ? messages.length : 0);
       if (!messages || messages.length === 0) {
         if (list.dataset.sig !== 'empty') {
           list.dataset.sig = 'empty';
@@ -997,6 +1104,17 @@
       return !stale;
     }
 
+    function currentPlayhead() {
+      if (!state || !state.active) return 0;
+      const now = Date.now() + clockOffset;
+      const age = Math.max(0, now - state.updatedAt);
+      const stale = age > (state.paused ? STALE_PAUSED_MS : STALE_PLAYING_MS);
+      let t = state.currentTime || 0;
+      if (!state.paused && !stale) t += (age / 1000) * (state.playbackRate || 1);
+      if (state.duration != null) t = Math.min(t, state.duration);
+      return Math.max(0, t);
+    }
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
@@ -1024,6 +1142,7 @@
         $('resume-btn').textContent = '▶ Resume';
         $('seek-input').disabled = true;
         $('seek-btn').disabled = true;
+        for (const b of skipBtns) b.disabled = true;
         document.title = 'Now Playing';
         return;
       }
@@ -1054,6 +1173,7 @@
       const seekable = !stale && !isLive;
       $('seek-input').disabled = !seekable;
       $('seek-btn').disabled = !seekable;
+      for (const b of skipBtns) b.disabled = !seekable;
 
       $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
       $('title').textContent = state.title || 'Something private 🤫';
@@ -1244,6 +1364,15 @@
       isScrubbing = false;
       card.classList.remove('scrubbing');
       render();
+    });
+
+    // Quick-skip buttons (-10s, -5s, +5s, +10s)
+    $('skip-row').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-skip]');
+      if (!btn || btn.disabled || !canSeek()) return;
+      const delta = Number(btn.getAttribute('data-skip'));
+      if (!Number.isFinite(delta) || delta === 0) return;
+      await performSeek(currentPlayhead() + delta);
     });
 
     // Jump to specific time form
