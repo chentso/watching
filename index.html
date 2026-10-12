@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Now Playing</title>
+  <style>
+    :root {
+      --bg: #0e1015;
+      --card: #171a22;
+      --text: #eef1f7;
+      --muted: #8a93a6;
+      --accent: #52b54b; /* Emby green */
+      --paused: #f0b429;
+      --off: #5b6375;
+      --track: #2a2f3c;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: radial-gradient(1200px 600px at 50% -10%, #1b2030 0%, var(--bg) 60%);
+      color: var(--text);
+      font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid #232838;
+      border-radius: 18px;
+      padding: 24px 26px 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #20242f;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
+    .playing .dot { background: var(--accent); box-shadow: 0 0 0 0 rgba(82, 181, 75, .7); animation: pulse 1.6s infinite; }
+    .paused .dot { background: var(--paused); }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(82, 181, 75, .6); }
+      70% { box-shadow: 0 0 0 8px rgba(82, 181, 75, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(82, 181, 75, 0); }
+    }
+    .main { display: flex; align-items: center; gap: 16px; }
+    .icon {
+      flex: none;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: #222737;
+      color: var(--off);
+    }
+    .playing .icon { color: var(--accent); }
+    .paused .icon { color: var(--paused); }
+    .icon svg { width: 24px; height: 24px; fill: currentColor; }
+    .titles { min-width: 0; }
+    .title {
+      font-size: 20px;
+      font-weight: 650;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      word-break: break-word;
+    }
+    .site { color: var(--muted); font-size: 14px; margin-top: 2px; }
+    .progress { margin-top: 22px; }
+    .bar {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--track);
+      overflow: hidden;
+    }
+    .fill {
+      position: absolute; inset: 0 auto 0 0;
+      width: 0%;
+      background: var(--off);
+      border-radius: inherit;
+      transition: width .25s linear;
+    }
+    .playing .fill { background: var(--accent); }
+    .paused .fill { background: var(--paused); }
+    .live .fill {
+      width: 100% !important;
+      background: repeating-linear-gradient(90deg, #e5484d 0 12px, #b8373b 12px 24px);
+      background-size: 48px 100%;
+      animation: slide 1.2s linear infinite;
+    }
+    .live.paused .fill { animation: none; }
+    @keyframes slide { to { background-position: 48px 0; } }
+    .times {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .times .now { color: var(--text); font-weight: 600; }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .idle .progress { opacity: .35; }
+    .hidden { display: none !important; }
+    .history {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #232838;
+    }
+    .history-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .history-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 210px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      background: #13161d;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      animation: fadeIn .25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .history-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+    .history-tag {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #202534;
+      font-size: 12px;
+    }
+    .history-tag.rewind { background: rgba(94, 168, 255, .15); color: #6eb2ff; }
+    .history-tag.forward { background: rgba(168, 130, 255, .15); color: #b99aff; }
+    .history-tag.paused { background: rgba(240, 180, 41, .15); color: var(--paused); }
+    .history-tag.resumed, .history-tag.started { background: rgba(82, 181, 75, .15); color: var(--accent); }
+    .history-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #d7dce8;
+    }
+    .history-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .history-ago {
+      flex: none;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .viewer-name {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 11px;
+      border-radius: 9px;
+      border: 1px solid #282e3f;
+      background: #11141b;
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+    }
+    .viewer-name::placeholder { color: #636b7e; }
+    .pause-btn {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 1px solid rgba(240, 180, 41, .4);
+      background: rgba(240, 180, 41, .14);
+      color: #f6c453;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .pause-btn:hover:not(:disabled) {
+      background: rgba(240, 180, 41, .24);
+    }
+    .pause-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      border-color: #2a2f3c;
+      background: #1f232e;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main id="card" class="card idle" aria-live="polite">
+    <div class="header">
+      <span id="heading">Now Playing</span>
+      <span class="badge"><span class="dot"></span><span id="status">Connecting…</span></span>
+    </div>
+
+    <div class="main">
+      <div class="icon" aria-hidden="true">
+        <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
+        <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+        <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
+      </div>
+      <div class="titles">
+        <div id="title" class="title">Waiting for a signal…</div>
+        <div id="site" class="site"></div>
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="bar"><div id="fill" class="fill"></div></div>
+      <div class="times">
+        <span id="current" class="now">–:––</span>
+        <span id="duration">–:––</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Your name (optional)" />
+      <button id="pause-btn" class="pause-btn" type="button" disabled>⏸ Request Pause</button>
+    </div>
+
+    <div class="footer">
+      <span id="updated"></span>
+      <span id="conn"></span>
+    </div>
+
+    <section id="history-section" class="history hidden">
+      <div class="history-title">Recent Activity</div>
+      <ul id="history-list" class="history-list"></ul>
+    </section>
+  </main>
+
+  <script>
+    'use strict';
+
+    // How long without an update before we assume the broadcaster went away.
+    // Paused background tabs can be heavily throttled by Chrome, so allow longer.
+    const STALE_PLAYING_MS = 30_000;
+    const STALE_PAUSED_MS = 150_000;
+
+    const $ = (id) => document.getElementById(id);
+    const card = $('card');
+
+    let state = null;
+    let history = [];
+    let name = '';
+    let clockOffset = 0; // serverNow - Date.now()
+    let connected = false;
+
+    function fmt(totalSeconds) {
+      if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return '–:––';
+      const s = Math.floor(totalSeconds);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = String(s % 60).padStart(2, '0');
+      return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+    }
+
+    function fmtDelta(seconds) {
+      const s = Math.round(Math.abs(seconds));
+      if (s < 60) return `${s}s`;
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      if (m < 60) return rem ? `${m}m ${rem}s` : `${m}m`;
+      const h = Math.floor(m / 60);
+      const remM = m % 60;
+      return remM ? `${h}h ${remM}m` : `${h}h`;
+    }
+
+    function ago(ms) {
+      const s = Math.round(Math.max(0, ms) / 1000);
+      if (s < 5) return 'just now';
+      if (s < 60) return `${s}s ago`;
+      const m = Math.round(s / 60);
+      if (m < 60) return `${m} min ago`;
+      return `${Math.round(m / 60)} h ago`;
+    }
+
+    function describeAction(item) {
+      switch (item.type) {
+        case 'rewind':
+          return {
+            icon: '⏪',
+            cls: 'rewind',
+            label: `Rewound ${fmtDelta(item.delta || (item.to - item.from))} (${fmt(item.from)} → ${fmt(item.to)})`,
+          };
+        case 'forward':
+          return {
+            icon: '⏩',
+            cls: 'forward',
+            label: `Fast-forwarded ${fmtDelta(item.delta || (item.to - item.from))} (${fmt(item.from)} → ${fmt(item.to)})`,
+          };
+        case 'paused':
+          return {
+            icon: '⏸',
+            cls: 'paused',
+            label: `Paused at ${fmt(item.at)}`,
+          };
+        case 'viewer-paused':
+          return {
+            icon: '✋',
+            cls: 'paused',
+            label: `${item.by || 'A viewer'} requested a pause at ${fmt(item.at)}`,
+          };
+        case 'resumed':
+          return {
+            icon: '▶',
+            cls: 'resumed',
+            label: `Resumed at ${fmt(item.at)}`,
+          };
+        case 'started':
+          return {
+            icon: '▶',
+            cls: 'started',
+            label: item.title ? `Started watching "${item.title}"` : `Started watching at ${fmt(item.at)}`,
+          };
+        case 'switched':
+          return {
+            icon: '⏭',
+            cls: 'started',
+            label: item.title ? `Switched to "${item.title}"` : 'Switched video',
+          };
+        case 'rate':
+          return {
+            icon: '⚡',
+            cls: 'forward',
+            label: `Changed speed to ${item.rate}× at ${fmt(item.at)}`,
+          };
+        case 'ended':
+          return {
+            icon: '🏁',
+            cls: 'paused',
+            label: `Finished watching (${fmt(item.at)})`,
+          };
+        case 'stopped':
+          return {
+            icon: '◼',
+            cls: 'paused',
+            label: 'Closed player',
+          };
+        default:
+          return { icon: '•', cls: '', label: item.type };
+      }
+    }
+
+    function renderHistory(now) {
+      const section = $('history-section');
+      const list = $('history-list');
+      if (!history || history.length === 0) {
+        section.classList.add('hidden');
+        list.replaceChildren();
+        return;
+      }
+      section.classList.remove('hidden');
+
+      // Rebuild items if count or newest ID/timestamp changed; otherwise just update relative times
+      const sig = history.map((h) => `${h.id}:${h.timestamp}:${h.to ?? ''}`).join('|');
+      if (list.dataset.sig !== sig) {
+        list.dataset.sig = sig;
+        const frag = document.createDocumentFragment();
+        for (const item of history) {
+          const info = describeAction(item);
+          const li = document.createElement('li');
+          li.className = 'history-item';
+          li.dataset.ts = String(item.timestamp);
+
+          const left = document.createElement('div');
+          left.className = 'history-left';
+
+          const tag = document.createElement('span');
+          tag.className = `history-tag ${info.cls}`;
+          tag.textContent = info.icon;
+
+          const text = document.createElement('span');
+          text.className = 'history-text';
+          text.textContent = info.label;
+          text.title = info.label;
+
+          left.append(tag, text);
+
+          const timeEl = document.createElement('span');
+          timeEl.className = 'history-ago';
+          timeEl.textContent = ago(now - item.timestamp);
+
+          li.append(left, timeEl);
+          frag.appendChild(li);
+        }
+        list.replaceChildren(frag);
+      } else {
+        for (const li of list.children) {
+          const ts = Number(li.dataset.ts);
+          const timeEl = li.querySelector('.history-ago');
+          if (timeEl && ts) timeEl.textContent = ago(now - ts);
+        }
+      }
+    }
+
+    function setMode(mode) {
+      card.classList.toggle('playing', mode === 'playing');
+      card.classList.toggle('paused', mode === 'paused');
+      card.classList.toggle('idle', mode === 'idle');
+      $('icon-play').classList.toggle('hidden', mode !== 'playing');
+      $('icon-pause').classList.toggle('hidden', mode !== 'paused');
+      $('icon-idle').classList.toggle('hidden', mode !== 'idle');
+    }
+
+    function render() {
+      const now = Date.now() + clockOffset;
+      $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
+      $('conn').textContent = connected ? '' : 'Reconnecting to server…';
+      renderHistory(now);
+
+      if (!state || !state.active) {
+        setMode('idle');
+        card.classList.remove('live');
+        $('status').textContent = connected ? 'Offline' : 'Connecting…';
+        $('title').textContent = 'Nothing playing right now';
+        $('site').textContent = '';
+        $('fill').style.width = '0%';
+        $('current').textContent = '–:––';
+        $('duration').textContent = '–:––';
+        $('updated').textContent = state ? `Last activity ${ago(now - state.updatedAt)}` : '';
+        $('pause-btn').disabled = true;
+        $('pause-btn').textContent = '⏸ Request Pause';
+        document.title = 'Now Playing';
+        return;
+      }
+
+      const age = Math.max(0, now - state.updatedAt);
+      const stale = age > (state.paused ? STALE_PAUSED_MS : STALE_PLAYING_MS);
+      const isLive = state.duration == null;
+
+      // Interpolate the playhead between updates so the clock ticks smoothly.
+      let t = state.currentTime;
+      if (!state.paused && !stale) t += (age / 1000) * state.playbackRate;
+      if (!isLive) t = Math.min(t, state.duration);
+
+      const mode = stale ? 'idle' : state.paused ? 'paused' : 'playing';
+      setMode(mode);
+      card.classList.toggle('live', isLive && !stale);
+
+      $('pause-btn').disabled = mode !== 'playing';
+      $('pause-btn').textContent = mode === 'paused' ? '⏸ Paused' : '⏸ Request Pause';
+
+      $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
+      $('title').textContent = state.title || 'Something private 🤫';
+      $('site').textContent = state.site || '';
+      $('current').textContent = fmt(t);
+      $('duration').textContent = isLive ? 'LIVE' : fmt(state.duration);
+      $('fill').style.width = isLive ? '100%' : `${Math.min(100, (t / state.duration) * 100).toFixed(2)}%`;
+      $('updated').textContent = `Updated ${ago(age)}` +
+        (state.playbackRate && state.playbackRate !== 1 ? ` · ${state.playbackRate}×` : '');
+
+      const glyph = mode === 'playing' ? '▶' : mode === 'paused' ? '⏸' : '◼';
+      document.title = `${glyph} ${state.title || 'Now Playing'}`;
+    }
+
+    function onState(json) {
+      const data = JSON.parse(json);
+      clockOffset = data.serverNow - Date.now();
+      state = data.state;
+      history = Array.isArray(data.history) ? data.history : [];
+      name = data.name || '';
+      connected = true;
+      render();
+    }
+
+    // Same-origin mode: page is served by the relay itself.
+    function connectSameOrigin() {
+      const es = new EventSource('events');
+      es.addEventListener('open', () => { connected = true; render(); });
+      es.addEventListener('error', () => { connected = false; render(); }); // EventSource auto-reconnects
+      es.addEventListener('state', (e) => onState(e.data));
+    }
+
+    // Remote mode: page is hosted elsewhere (e.g. GitHub Pages) and opened with
+    // ?server=https://xxxx-8787.usw2.devtunnels.ms . EventSource can't send custom
+    // headers, so stream the SSE response with fetch() and add the headers that
+    // tell Dev Tunnels / ngrok to skip their browser warning pages.
+    async function connectRemote(base) {
+      const url = `${base.replace(/\/+$/, '')}/events`;
+      for (;;) {
+        try {
+          const res = await fetch(url, {
+            cache: 'no-store',
+            headers: {
+              Accept: 'text/event-stream',
+              'X-Tunnel-Skip-AntiPhishing-Page': 'True',
+              'ngrok-skip-browser-warning': '1',
+              'bypass-tunnel-reminder': '1',
+            },
+          });
+          if (!res.ok || !(res.headers.get('content-type') || '').includes('text/event-stream')) {
+            throw new Error(`Unexpected response (${res.status})`);
+          }
+          connected = true;
+          render();
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          for (;;) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const events = buffer.split(/\r?\n\r?\n/);
+            buffer = events.pop();
+            for (const block of events) {
+              let type = 'message';
+              const data = [];
+              for (const line of block.split(/\r?\n/)) {
+                if (line.startsWith('event:')) type = line.slice(6).trim();
+                else if (line.startsWith('data:')) data.push(line.slice(5).replace(/^ /, ''));
+              }
+              if (type === 'state' && data.length) onState(data.join('\n'));
+            }
+          }
+        } catch (err) {
+          console.warn('Stream error:', err);
+        }
+        connected = false;
+        render();
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
+
+    // If this page is hosted on a static site (Netlify Drop, GitHub Pages, etc.) or opened
+    // as a local file, automatically connect to your permanent Dev Tunnel in the background
+    // with the skip-warning header so friends never see any interstitial page.
+    const DEFAULT_TUNNEL_URL = 'https://0wlgwzvr-8787.usw2.devtunnels.ms';
+    const isServedByRelay =
+      location.port === '8787' ||
+      /\.devtunnels\.ms$|\.lhr\.life$|\.loca\.lt$|\.ngrok/i.test(location.hostname);
+    const remoteServer =
+      new URLSearchParams(location.search).get('server') ||
+      (!isServedByRelay ? DEFAULT_TUNNEL_URL : null);
+    const apiBase = remoteServer ? remoteServer.replace(/\/+$/, '') : '';
+
+    try {
+      $('viewer-name').value = localStorage.getItem('np_viewer_name') || '';
+      $('viewer-name').addEventListener('input', (e) => {
+        try { localStorage.setItem('np_viewer_name', e.target.value.trim()); } catch {}
+      });
+    } catch {}
+
+    $('pause-btn').addEventListener('click', async () => {
+      const btn = $('pause-btn');
+      btn.disabled = true;
+      btn.textContent = 'Pausing…';
+      const by = ($('viewer-name').value || '').trim();
+      try {
+        await fetch(`${apiBase}/api/request-pause`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Tunnel-Skip-AntiPhishing-Page': 'True',
+            'ngrok-skip-browser-warning': '1',
+            'bypass-tunnel-reminder': '1',
+          },
+          body: JSON.stringify({ by }),
+        });
+      } catch (err) {
+        console.warn('Pause request failed:', err);
+        render();
+      }
+    });
+
+    if (remoteServer) connectRemote(remoteServer);
+    else connectSameOrigin();
+    setInterval(render, 250);
+  </script>
+</body>
+</html>
