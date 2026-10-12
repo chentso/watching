@@ -431,6 +431,7 @@
     }
     .chat-name-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
       margin-bottom: 10px;
@@ -439,20 +440,103 @@
       background: #11141b;
       border: 1px solid #252b3b;
     }
+    .chat-field-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1 1 170px;
+      min-width: 0;
+    }
+    .chat-field-group.code-group {
+      flex: 0 1 155px;
+    }
     .chat-name-label {
       flex: none;
       color: #9ba3b5;
       font-size: 12.5px;
       font-weight: 600;
+      white-space: nowrap;
     }
-    .chat-name-row .viewer-name {
+    .chat-name-row .viewer-name,
+    .chat-name-row .viewer-code {
       flex: 1;
       min-width: 0;
       padding: 6px 10px;
       border-radius: 8px;
       border: 1px solid #282e3f;
       background: #171b24;
+      color: var(--text);
+      font: inherit;
       font-size: 16px;
+    }
+    .chat-name-row .viewer-code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: 0.08em;
+      text-align: center;
+      max-width: 96px;
+    }
+    .code-gate {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(24, 29, 42, 0.96), rgba(17, 20, 29, 0.98));
+      border: 1px solid rgba(122, 184, 255, 0.38);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .code-gate-title {
+      font-size: 15px;
+      font-weight: 650;
+      color: #eef1f7;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .code-gate-desc {
+      font-size: 13px;
+      color: #9ba3b5;
+      line-height: 1.4;
+    }
+    .code-gate-form {
+      display: flex;
+      gap: 8px;
+    }
+    .code-gate-input {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #2d364d;
+      background: #11141b;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-align: center;
+    }
+    .code-gate-input::placeholder {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: normal;
+      color: #636b7e;
+    }
+    .code-gate-btn {
+      flex: none;
+      padding: 10px 18px;
+      border: 1px solid rgba(94, 168, 255, 0.5);
+      background: rgba(94, 168, 255, 0.2);
+      color: #9ecaff;
+    }
+    .code-gate-btn:hover:not(:disabled) {
+      background: rgba(94, 168, 255, 0.32);
+    }
+    .code-gate-err {
+      color: #ff7b7f;
+      font-size: 12.5px;
+      font-weight: 500;
     }
     .chat-list {
       max-height: 240px;
@@ -472,6 +556,7 @@
       padding: 16px 8px;
     }
     .chat-msg {
+      position: relative;
       display: flex;
       flex-direction: column;
       gap: 2px;
@@ -485,6 +570,9 @@
     .chat-msg.host {
       background: rgba(82, 181, 75, .12);
       border-color: rgba(82, 181, 75, .28);
+    }
+    .chat-msg.picker-open {
+      border-color: rgba(122, 184, 255, .45);
     }
     .chat-meta {
       display: flex;
@@ -544,15 +632,41 @@
       align-items: center;
       gap: 2px;
       opacity: 0;
+      pointer-events: none;
       transition: opacity .15s ease;
     }
-    .chat-msg:hover .chat-react-picker,
-    .chat-msg:focus-within .chat-react-picker {
-      opacity: 1;
+    @media (hover: hover) and (pointer: fine) {
+      .chat-msg:hover .chat-react-picker,
+      .chat-msg:focus-within .chat-react-picker {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
-    @media (hover: none) and (pointer: coarse) {
+    .chat-msg.picker-open .chat-react-picker {
+      display: inline-flex;
+      opacity: 1;
+      pointer-events: auto;
+      background: #202636;
+      border: 1px solid rgba(122, 184, 255, .35);
+      border-radius: 999px;
+      padding: 3px 6px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+    }
+    @media (hover: none), (pointer: coarse) {
+      .chat-msg {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
       .chat-react-picker {
-        opacity: .85;
+        display: none;
+      }
+      .chat-msg.picker-open .chat-react-picker {
+        display: inline-flex;
+      }
+      .chat-react-btn {
+        font-size: 18px;
+        padding: 4px 7px;
       }
     }
     .chat-react-btn {
@@ -560,7 +674,7 @@
       background: transparent;
       padding: 2px 5px;
       border-radius: 6px;
-      font-size: 13.5px;
+      font-size: 14px;
       line-height: 1;
       cursor: pointer;
       transition: background .12s, transform .1s;
@@ -671,94 +785,112 @@
       <span class="badge"><span class="dot"></span><span id="status">Connecting…</span></span>
     </div>
 
-    <div class="main">
-      <div class="icon" aria-hidden="true">
-        <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
-        <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
-        <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
-      </div>
-      <div class="titles">
-        <div id="title" class="title">Waiting for a signal…</div>
-        <div id="site" class="site"></div>
-      </div>
+    <div id="code-gate" class="code-gate hidden">
+      <div class="code-gate-title">🔐 Security Code Required</div>
+      <div class="code-gate-desc">Enter the security code shown at the top of the Host's player chat window to join and control playback.</div>
+      <form id="code-gate-form" class="code-gate-form" autocomplete="off">
+        <input id="code-gate-input" class="code-gate-input" type="text" inputmode="numeric" maxlength="12" placeholder="Enter security code" />
+        <button id="code-gate-btn" class="action-btn code-gate-btn" type="submit">Unlock</button>
+      </form>
+      <div id="code-gate-err" class="code-gate-err hidden">Invalid security code. Please check with the Host.</div>
     </div>
 
-    <div class="progress">
-      <div id="bar-wrap" class="bar-wrap" role="slider" aria-label="Seek video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-        <div id="seek-tooltip" class="seek-tooltip">0:00</div>
-        <div id="bar" class="bar">
-          <div id="fill" class="fill"></div>
-          <div id="thumb" class="thumb"></div>
+    <div id="unlocked-body">
+      <div class="main">
+        <div class="icon" aria-hidden="true">
+          <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
+          <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
+        </div>
+        <div class="titles">
+          <div id="title" class="title">Waiting for a signal…</div>
+          <div id="site" class="site"></div>
         </div>
       </div>
-      <div class="times">
-        <span id="current" class="now">–:––</span>
-        <span id="duration">–:––</span>
-      </div>
-    </div>
 
-    <div class="controls">
-      <div class="btn-row">
-        <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
-        <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
-        <button id="resume-btn" class="action-btn resume-btn" type="button" disabled>▶ Resume</button>
-      </div>
-      <div id="skip-row" class="skip-row">
-        <button class="action-btn skip-btn" type="button" data-skip="-10" disabled>⏪ -10s</button>
-        <button class="action-btn skip-btn" type="button" data-skip="-5" disabled>⏪ -5s</button>
-        <button class="action-btn skip-btn" type="button" data-skip="5" disabled>+5s ⏩</button>
-        <button class="action-btn skip-btn" type="button" data-skip="10" disabled>+10s ⏩</button>
-      </div>
-      <form id="seek-form" class="seek-row" autocomplete="off">
-        <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
-        <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
-      </form>
-    </div>
-
-    <div class="footer">
-      <span id="updated"></span>
-      <span id="conn"></span>
-    </div>
-
-    <div class="tabs-bar" role="tablist">
-      <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
-        <span>💬 Live Chat</span>
-        <span id="chat-count" class="tab-count">0</span>
-      </button>
-      <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
-        <span>📜 Recent Activity</span>
-        <span id="history-count" class="tab-count">0</span>
-      </button>
-    </div>
-
-    <section id="chat-section" class="chat">
-      <div class="chat-name-row">
-        <label class="chat-name-label" for="viewer-name">👤 Your name</label>
-        <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Enter your name (optional)" />
-      </div>
-      <div id="chat-list" class="chat-list">
-        <div class="chat-empty">No messages yet — say hi!</div>
-      </div>
-      <div class="chat-emoji-bar">
-        <span class="chat-emoji-label">Quick emoji</span>
-        <div id="chat-emoji-list" class="chat-emoji-list">
-          <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
-          <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
-          <button type="button" class="chat-emoji-quick" data-emoji="🔥" title="Insert 🔥">🔥</button>
-          <button type="button" class="chat-emoji-quick" data-emoji="😮" title="Insert 😮">😮</button>
-          <button type="button" class="chat-emoji-quick" data-emoji="👏" title="Insert 👏">👏</button>
-          <button type="button" class="chat-emoji-quick" data-emoji="😭" title="Insert 😭">😭</button>
+      <div class="progress">
+        <div id="bar-wrap" class="bar-wrap" role="slider" aria-label="Seek video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="seek-tooltip" class="seek-tooltip">0:00</div>
+          <div id="bar" class="bar">
+            <div id="fill" class="fill"></div>
+            <div id="thumb" class="thumb"></div>
+          </div>
+        </div>
+        <div class="times">
+          <span id="current" class="now">–:––</span>
+          <span id="duration">–:––</span>
         </div>
       </div>
-      <form id="chat-form" class="chat-form" autocomplete="off">
-        <input id="chat-input" class="chat-input" type="text" maxlength="500" placeholder="Write a message…" />
-        <button id="chat-send-btn" class="action-btn chat-send-btn" type="submit">Send</button>
-      </form>
-    </section>
 
-    <section id="history-section" class="history hidden">
-      <ul id="history-list" class="history-list"></ul>
-    </section>
+      <div class="controls">
+        <div class="btn-row">
+          <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
+          <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
+          <button id="resume-btn" class="action-btn resume-btn" type="button" disabled>▶ Resume</button>
+        </div>
+        <div id="skip-row" class="skip-row">
+          <button class="action-btn skip-btn" type="button" data-skip="-10" disabled>⏪ -10s</button>
+          <button class="action-btn skip-btn" type="button" data-skip="-5" disabled>⏪ -5s</button>
+          <button class="action-btn skip-btn" type="button" data-skip="5" disabled>+5s ⏩</button>
+          <button class="action-btn skip-btn" type="button" data-skip="10" disabled>+10s ⏩</button>
+        </div>
+        <form id="seek-form" class="seek-row" autocomplete="off">
+          <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
+          <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
+        </form>
+      </div>
+
+      <div class="footer">
+        <span id="updated"></span>
+        <span id="conn"></span>
+      </div>
+
+      <div class="tabs-bar" role="tablist">
+        <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
+          <span>💬 Live Chat</span>
+          <span id="chat-count" class="tab-count">0</span>
+        </button>
+        <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
+          <span>📜 Recent Activity</span>
+          <span id="history-count" class="tab-count">0</span>
+        </button>
+      </div>
+
+      <section id="chat-section" class="chat">
+        <div class="chat-name-row">
+          <div class="chat-field-group">
+            <label class="chat-name-label" for="viewer-name">👤 Your name</label>
+            <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Name (optional)" />
+          </div>
+          <div class="chat-field-group code-group">
+            <label class="chat-name-label" for="viewer-code" title="Security code (can be updated anytime)">🔐 Code</label>
+            <input id="viewer-code" class="viewer-code" type="text" inputmode="numeric" maxlength="12" placeholder="Code" />
+          </div>
+        </div>
+        <div id="chat-list" class="chat-list">
+          <div class="chat-empty">No messages yet — say hi!</div>
+        </div>
+        <div class="chat-emoji-bar">
+          <span class="chat-emoji-label">Quick emoji</span>
+          <div id="chat-emoji-list" class="chat-emoji-list">
+            <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
+            <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
+            <button type="button" class="chat-emoji-quick" data-emoji="🔥" title="Insert 🔥">🔥</button>
+            <button type="button" class="chat-emoji-quick" data-emoji="😮" title="Insert 😮">😮</button>
+            <button type="button" class="chat-emoji-quick" data-emoji="👏" title="Insert 👏">👏</button>
+            <button type="button" class="chat-emoji-quick" data-emoji="😭" title="Insert 😭">😭</button>
+          </div>
+        </div>
+        <form id="chat-form" class="chat-form" autocomplete="off">
+          <input id="chat-input" class="chat-input" type="text" maxlength="500" placeholder="Write a message…" />
+          <button id="chat-send-btn" class="action-btn chat-send-btn" type="submit">Send</button>
+        </form>
+      </section>
+
+      <section id="history-section" class="history hidden">
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -989,8 +1121,20 @@
     }
 
     const QUICK_EMOJIS = ['😂', '❤️', '🔥', '😮', '👏', '😭'];
+    let openPickerMsgId = null;
+
+    function syncOpenReactionPicker() {
+      const list = $('chat-list');
+      if (!list) return;
+      for (const el of list.querySelectorAll('.chat-msg')) {
+        const id = Number(el.dataset.msgId);
+        el.classList.toggle('picker-open', openPickerMsgId != null && id === openPickerMsgId);
+      }
+    }
 
     async function toggleViewerReaction(messageId, emoji) {
+      openPickerMsgId = null;
+      syncOpenReactionPicker();
       try {
         await sendViewerAction('/api/chat/react', { messageId, emoji, role: 'viewer' });
       } catch (err) {
@@ -1012,7 +1156,7 @@
       const myName = (($('viewer-name') && $('viewer-name').value) || '').trim() || 'Viewer';
       const sig = messages
         .map((m) => `${m.id}:${JSON.stringify(m.reactions || {})}`)
-        .join('|') + `|me=${myName}`;
+        .join('|') + `|me=${myName}|open=${openPickerMsgId ?? ''}`;
       if (list.dataset.sig === sig) return;
       const prevCount = Number(list.dataset.count || 0);
       const isNewMsg = messages.length > prevCount;
@@ -1025,7 +1169,9 @@
       for (const m of messages) {
         const item = document.createElement('div');
         const isHost = m.role === 'host';
-        item.className = `chat-msg ${isHost ? 'host' : 'viewer'}`;
+        const isPickerOpen = openPickerMsgId === m.id;
+        item.className = `chat-msg ${isHost ? 'host' : 'viewer'}${isPickerOpen ? ' picker-open' : ''}`;
+        item.dataset.msgId = String(m.id);
 
         const meta = document.createElement('div');
         meta.className = 'chat-meta';
@@ -1087,6 +1233,62 @@
       }
     }
 
+    // Long-press on mobile to open reaction emoji picker on a chat message
+    let longPressTimer = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    $('chat-list').addEventListener('touchstart', (e) => {
+      if (e.target.closest('button')) return;
+      const msgEl = e.target.closest('.chat-msg[data-msg-id]');
+      if (!msgEl) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      const msgId = Number(msgEl.dataset.msgId);
+      if (longPressTimer) clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        openPickerMsgId = openPickerMsgId === msgId ? null : msgId;
+        syncOpenReactionPicker();
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch {}
+      }, 420);
+    }, { passive: true });
+
+    $('chat-list').addEventListener('touchmove', (e) => {
+      if (!longPressTimer) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      if (Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY) > 10) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    }, { passive: true });
+
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+    $('chat-list').addEventListener('touchend', cancelLongPress, { passive: true });
+    $('chat-list').addEventListener('touchcancel', cancelLongPress, { passive: true });
+    $('chat-list').addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.chat-msg[data-msg-id]') && window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (openPickerMsgId == null) return;
+      const inOpenMsg = e.target.closest(`.chat-msg[data-msg-id="${openPickerMsgId}"]`);
+      if (!inOpenMsg) {
+        openPickerMsgId = null;
+        syncOpenReactionPicker();
+      }
+    });
+
     function setMode(mode) {
       card.classList.toggle('playing', mode === 'playing');
       card.classList.toggle('paused', mode === 'paused');
@@ -1097,6 +1299,7 @@
     }
 
     function canSeek() {
+      if (!codeVerified) return false;
       if (!state || !state.active || state.duration == null || state.duration <= 0) return false;
       const now = Date.now() + clockOffset;
       const age = Math.max(0, now - state.updatedAt);
@@ -1115,10 +1318,30 @@
       return Math.max(0, t);
     }
 
+    let codeVerified = false;
+    let serverSessionId = '';
+    let verifiedSessionId = '';
+    let verifyingCode = false;
+
+    function updateLockUI() {
+      const locked = connected && !codeVerified;
+      $('code-gate').classList.toggle('hidden', !locked);
+      $('unlocked-body').classList.toggle('hidden', locked);
+    }
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
       $('conn').textContent = connected ? '' : 'Reconnecting to server…';
+      updateLockUI();
+
+      if (connected && !codeVerified) {
+        setMode('idle');
+        $('status').textContent = 'Locked';
+        document.title = '🔐 Security Code Required';
+        return;
+      }
+
       renderChat();
       renderHistory(now);
 
@@ -1199,6 +1422,14 @@
       messages = Array.isArray(data.messages) ? data.messages : [];
       name = data.name || '';
       connected = true;
+      if (data.codeSessionId && data.codeSessionId !== serverSessionId) {
+        serverSessionId = data.codeSessionId;
+        if (verifiedSessionId !== serverSessionId) {
+          verifySecurityCode(getStoredCode(), false);
+        }
+      } else if (!data.codeSessionId && !codeVerified) {
+        verifySecurityCode(getStoredCode(), false);
+      }
       render();
     }
 
@@ -1273,25 +1504,131 @@
     const apiBase = remoteServer ? remoteServer.replace(/\/+$/, '') : '';
     let reqCooldown = false;
 
+    function getStoredCode() {
+      try {
+        return ($('viewer-code').value || localStorage.getItem('np_security_code') || '').trim();
+      } catch {
+        return ($('viewer-code').value || '').trim();
+      }
+    }
+
+    function setStoredCode(code) {
+      const cleaned = String(code || '').trim();
+      $('viewer-code').value = cleaned;
+      $('code-gate-input').value = cleaned;
+      try {
+        localStorage.setItem('np_security_code', cleaned);
+      } catch {}
+    }
+
+    async function verifySecurityCode(codeToTry, showErrOnFail = true) {
+      const cleaned = String(codeToTry || '').trim();
+      if (!cleaned) {
+        codeVerified = false;
+        verifiedSessionId = '';
+        if (showErrOnFail) $('code-gate-err').classList.remove('hidden');
+        render();
+        return false;
+      }
+      if (verifyingCode) return false;
+      verifyingCode = true;
+      try {
+        const res = await fetch(`${apiBase}/api/verify-code`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Security-Code': cleaned,
+            'X-Tunnel-Skip-AntiPhishing-Page': 'True',
+            'ngrok-skip-browser-warning': '1',
+            'bypass-tunnel-reminder': '1',
+          },
+          body: JSON.stringify({ code: cleaned }),
+        });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setStoredCode(cleaned);
+          codeVerified = true;
+          verifiedSessionId = data.codeSessionId || serverSessionId || 'ok';
+          $('code-gate-err').classList.add('hidden');
+          $('viewer-code').style.borderColor = '';
+          render();
+          return true;
+        }
+        codeVerified = false;
+        verifiedSessionId = '';
+        if (showErrOnFail) {
+          $('code-gate-err').classList.remove('hidden');
+        }
+        render();
+        return false;
+      } catch (err) {
+        console.warn('Code verification error:', err);
+        return false;
+      } finally {
+        verifyingCode = false;
+      }
+    }
+
     try {
       $('viewer-name').value = localStorage.getItem('np_viewer_name') || '';
       $('viewer-name').addEventListener('input', (e) => {
         try { localStorage.setItem('np_viewer_name', e.target.value.trim()); } catch {}
+        renderChat();
       });
+      const initialCode = localStorage.getItem('np_security_code') || '';
+      $('viewer-code').value = initialCode;
+      $('code-gate-input').value = initialCode;
     } catch {}
+
+    let codeInputTimer = null;
+    $('viewer-code').addEventListener('input', (e) => {
+      const val = (e.target.value || '').trim();
+      $('code-gate-input').value = val;
+      try { localStorage.setItem('np_security_code', val); } catch {}
+      if (codeInputTimer) clearTimeout(codeInputTimer);
+      codeInputTimer = setTimeout(async () => {
+        if (!val) return;
+        const ok = await verifySecurityCode(val, false);
+        $('viewer-code').style.borderColor = ok ? '#52b54b' : '#e5484d';
+        if (ok) {
+          setTimeout(() => { $('viewer-code').style.borderColor = ''; }, 1200);
+        }
+      }, 450);
+    });
+
+    $('code-gate-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = ($('code-gate-input').value || '').trim();
+      const ok = await verifySecurityCode(val, true);
+      if (!ok) {
+        $('code-gate-input').focus();
+        $('code-gate-input').select();
+      }
+    });
 
     async function sendViewerAction(endpoint, extra = {}) {
       const by = ($('viewer-name').value || '').trim();
-      await fetch(`${apiBase}${endpoint}`, {
+      const code = getStoredCode();
+      const res = await fetch(`${apiBase}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Security-Code': code,
           'X-Tunnel-Skip-AntiPhishing-Page': 'True',
           'ngrok-skip-browser-warning': '1',
           'bypass-tunnel-reminder': '1',
         },
-        body: JSON.stringify({ by, ...extra }),
+        body: JSON.stringify({ by, code, ...extra }),
       });
+      if (res.status === 401) {
+        codeVerified = false;
+        verifiedSessionId = '';
+        $('code-gate-err').classList.remove('hidden');
+        render();
+        setTimeout(() => $('code-gate-input').focus(), 50);
+        throw new Error('Invalid security code');
+      }
+      return res;
     }
 
     async function performSeek(targetSeconds) {
