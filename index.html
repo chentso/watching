@@ -217,6 +217,12 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       word-break: break-word;
+      cursor: pointer;
+    }
+    .title.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
     }
     .site { color: var(--muted); font-size: 14px; margin-top: 2px; }
     .progress { margin-top: 18px; }
@@ -1912,6 +1918,26 @@
       updateSubLineEl($('sub-line-next'), 'next', nextCue, seekable);
     }
 
+    let titleExpandTimer = null;
+    $('title').addEventListener('click', () => {
+      const el = $('title');
+      if (!el) return;
+      const willExpand = !el.classList.contains('expanded');
+      if (titleExpandTimer) {
+        clearTimeout(titleExpandTimer);
+        titleExpandTimer = null;
+      }
+      if (willExpand) {
+        el.classList.add('expanded');
+        titleExpandTimer = setTimeout(() => {
+          el.classList.remove('expanded');
+          titleExpandTimer = null;
+        }, 5000);
+      } else {
+        el.classList.remove('expanded');
+      }
+    });
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
@@ -1935,6 +1961,8 @@
         $('sub-preview').classList.add('hidden');
         $('status').textContent = connected ? 'Offline' : 'Connecting…';
         $('title').textContent = 'Nothing playing right now';
+        $('title').removeAttribute('title');
+        $('title').classList.remove('expanded');
         $('site').textContent = '';
         $('fill').style.width = '0%';
         $('thumb').style.left = '0%';
@@ -1990,7 +2018,13 @@
       renderSubtitlePreview(displayTime, stale, seekable);
 
       $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
-      $('title').textContent = state.title || 'Something private 🤫';
+      const fullTitle = state.title || 'Something private 🤫';
+      $('title').textContent = fullTitle;
+      if (state.title) {
+        $('title').setAttribute('title', state.title);
+      } else {
+        $('title').removeAttribute('title');
+      }
       $('site').textContent = state.site || '';
       $('current').textContent = fmt(displayTime);
       $('duration').textContent = isLive ? 'LIVE' : fmt(state.duration);
