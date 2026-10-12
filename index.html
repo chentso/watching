@@ -1185,7 +1185,7 @@
     <div class="header">
       <span id="heading">Now Playing</span>
       <div class="header-right">
-        <button id="theme-btn" class="theme-btn" type="button" title="Current theme: Night (click to switch)">🌙 Night</button>
+        <button id="theme-btn" class="theme-btn" type="button" title="Current theme: Night (click to switch)">🌙</button>
         <span class="badge"><span class="dot"></span><span id="status">Connecting…</span></span>
       </div>
     </div>
@@ -1295,7 +1295,7 @@
       document.documentElement.classList.toggle('day', isDay);
       const btn = $('theme-btn');
       if (btn) {
-        btn.textContent = isDay ? '☀️ Day' : '🌙 Night';
+        btn.textContent = isDay ? '☀️' : '🌙';
         btn.title = isDay ? 'Current theme: Day (click to switch)' : 'Current theme: Night (click to switch)';
       }
       try { localStorage.setItem('np_theme', isDay ? 'day' : 'night'); } catch {}
