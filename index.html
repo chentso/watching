@@ -749,7 +749,32 @@
     }
     .code-gate-form {
       display: flex;
+      flex-direction: column;
       gap: 8px;
+    }
+    .code-gate-row {
+      display: flex;
+      gap: 8px;
+    }
+    .code-gate-name-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #2d364d;
+      background: #11141b;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+    }
+    html.day .code-gate-name-input {
+      background: #ffffff;
+      border-color: #cbd4e3;
+    }
+    .code-gate-name-input::placeholder {
+      color: #636b7e;
+    }
+    html.day .code-gate-name-input::placeholder {
+      color: #8892a6;
     }
     .code-gate-input {
       flex: 1;
@@ -835,17 +860,34 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-      padding: 7px 10px;
-      border-radius: 9px;
+      max-width: 84%;
+      min-width: 150px;
+      padding: 7px 11px;
+      border-radius: 12px;
       background: #181c26;
-      border: 1px solid rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .05);
       font-size: 13.5px;
       word-break: break-word;
+    }
+    .chat-msg.other,
+    .chat-msg.host {
+      align-self: flex-start;
+      border-bottom-left-radius: 3px;
+    }
+    .chat-msg.mine {
+      align-self: flex-end;
+      border-bottom-right-radius: 3px;
+      background: rgba(94, 168, 255, .16);
+      border-color: rgba(94, 168, 255, .36);
     }
     html.day .chat-msg {
       background: #ffffff;
       border-color: #e2e8f2;
       box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+    }
+    html.day .chat-msg.mine {
+      background: #e4f0ff;
+      border-color: rgba(24, 119, 242, .34);
     }
     .chat-msg.host {
       background: rgba(82, 181, 75, .12);
@@ -861,11 +903,28 @@
     html.day .chat-msg.picker-open {
       border-color: rgba(24, 119, 242, .5);
     }
+    .chat-msg-system {
+      align-self: center;
+      max-width: 92%;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .09);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.35;
+    }
+    html.day .chat-msg-system {
+      background: #e9eef7;
+      border-color: #d5deed;
+      color: #525d72;
+    }
     .chat-meta {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
       font-size: 11.5px;
     }
     .chat-author {
@@ -874,6 +933,12 @@
     }
     html.day .chat-author {
       color: #1565c0;
+    }
+    .chat-msg.mine .chat-author {
+      color: #9ecaff;
+    }
+    html.day .chat-msg.mine .chat-author {
+      color: #0d47a1;
     }
     .chat-msg.host .chat-author {
       color: #6fd368;
@@ -897,6 +962,9 @@
       align-items: center;
       gap: 5px;
       margin-top: 3px;
+    }
+    .chat-msg.mine .chat-msg-footer {
+      justify-content: flex-end;
     }
     .chat-react-pill {
       display: inline-flex;
@@ -1128,10 +1196,13 @@
 
     <div id="code-gate" class="code-gate hidden">
       <div class="code-gate-title">🔐 Security Code Required</div>
-      <div class="code-gate-desc">Enter the security code shown at the top of the Host's player chat window to join and control playback.</div>
+      <div class="code-gate-desc">Enter your name and the security code shown at the top of the Host's player chat window to join and control playback.</div>
       <form id="code-gate-form" class="code-gate-form" autocomplete="off">
-        <input id="code-gate-input" class="code-gate-input" type="text" inputmode="numeric" maxlength="12" placeholder="Enter security code" />
-        <button id="code-gate-btn" class="action-btn code-gate-btn" type="submit">Unlock</button>
+        <input id="code-gate-name" class="code-gate-name-input" type="text" maxlength="30" placeholder="👤 Your name (optional)" />
+        <div class="code-gate-row">
+          <input id="code-gate-input" class="code-gate-input" type="text" inputmode="numeric" maxlength="12" placeholder="Enter security code" />
+          <button id="code-gate-btn" class="action-btn code-gate-btn" type="submit">Unlock</button>
+        </div>
       </form>
       <div id="code-gate-err" class="code-gate-err hidden">Invalid security code. Please check with the Host.</div>
     </div>
@@ -1277,6 +1348,16 @@
     let isScrubbing = false;
     let scrubTime = 0;
     let activeTab = 'chat';
+    let viewerId = '';
+    try {
+      viewerId = localStorage.getItem('np_viewer_id') || '';
+      if (!viewerId) {
+        viewerId = 'v_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+        localStorage.setItem('np_viewer_id', viewerId);
+      }
+    } catch {
+      viewerId = 'v_' + Math.random().toString(36).slice(2, 10);
+    }
 
     function switchTab(tab) {
       activeTab = tab === 'history' ? 'history' : 'chat';
@@ -1518,8 +1599,8 @@
 
       const myName = (($('viewer-name') && $('viewer-name').value) || '').trim() || 'Viewer';
       const sig = messages
-        .map((m) => `${m.id}:${JSON.stringify(m.reactions || {})}`)
-        .join('|') + `|me=${myName}|open=${openPickerMsgId ?? ''}`;
+        .map((m) => `${m.id}:${m.by || ''}:${m.text || ''}:${JSON.stringify(m.reactions || {})}`)
+        .join('|') + `|me=${myName}|vid=${viewerId}|open=${openPickerMsgId ?? ''}`;
       if (list.dataset.sig === sig) return;
       const prevCount = Number(list.dataset.count || 0);
       const isNewMsg = messages.length > prevCount;
@@ -1530,10 +1611,22 @@
 
       const frag = document.createDocumentFragment();
       for (const m of messages) {
+        if (m.role === 'system' || m.type === 'join') {
+          const sys = document.createElement('div');
+          sys.className = 'chat-msg-system';
+          const clock = m.timestamp
+            ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : '';
+          sys.textContent = `👋 ${m.text || `${m.by || 'Viewer'} has entered the chat`}${clock ? ` · ${clock}` : ''}`;
+          frag.appendChild(sys);
+          continue;
+        }
+
         const item = document.createElement('div');
         const isHost = m.role === 'host';
+        const isMine = !isHost && ((m.senderId && m.senderId === viewerId) || (!m.senderId && myName !== 'Viewer' && m.by === myName));
         const isPickerOpen = openPickerMsgId === m.id;
-        item.className = `chat-msg ${isHost ? 'host' : 'viewer'}${isPickerOpen ? ' picker-open' : ''}`;
+        item.className = `chat-msg ${isHost ? 'host other' : isMine ? 'viewer mine' : 'viewer other'}${isPickerOpen ? ' picker-open' : ''}`;
         item.dataset.msgId = String(m.id);
 
         const meta = document.createElement('div');
@@ -1541,7 +1634,7 @@
 
         const author = document.createElement('span');
         author.className = 'chat-author';
-        author.textContent = isHost ? `👑 ${m.by || name || 'Host'}` : (m.by || 'Viewer');
+        author.textContent = isHost ? `👑 ${m.by || name || 'Host'}` : isMine ? (m.by || myName) : (m.by || 'Viewer');
 
         const time = document.createElement('span');
         time.className = 'chat-time';
@@ -1907,6 +2000,7 @@
       if (verifyingCode) return false;
       verifyingCode = true;
       try {
+        const by = (($('viewer-name') && $('viewer-name').value) || ($('code-gate-name') && $('code-gate-name').value) || '').trim();
         const res = await fetch(`${apiBase}/api/verify-code`, {
           method: 'POST',
           headers: {
@@ -1916,7 +2010,7 @@
             'ngrok-skip-browser-warning': '1',
             'bypass-tunnel-reminder': '1',
           },
-          body: JSON.stringify({ code: cleaned }),
+          body: JSON.stringify({ code: cleaned, senderId: viewerId, by }),
         });
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -1943,12 +2037,32 @@
       }
     }
 
+    let nameSyncTimer = null;
+    function syncViewerName(rawVal) {
+      const trimmed = (rawVal || '').trim();
+      try { localStorage.setItem('np_viewer_name', trimmed); } catch {}
+      renderChat();
+      if (!codeVerified) return;
+      if (nameSyncTimer) clearTimeout(nameSyncTimer);
+      nameSyncTimer = setTimeout(() => {
+        sendViewerAction('/api/viewer-name').catch(() => {});
+      }, 600);
+    }
+
     try {
-      $('viewer-name').value = localStorage.getItem('np_viewer_name') || '';
+      const savedName = localStorage.getItem('np_viewer_name') || '';
+      $('viewer-name').value = savedName;
+      if ($('code-gate-name')) $('code-gate-name').value = savedName;
       $('viewer-name').addEventListener('input', (e) => {
-        try { localStorage.setItem('np_viewer_name', e.target.value.trim()); } catch {}
-        renderChat();
+        if ($('code-gate-name')) $('code-gate-name').value = e.target.value;
+        syncViewerName(e.target.value);
       });
+      if ($('code-gate-name')) {
+        $('code-gate-name').addEventListener('input', (e) => {
+          $('viewer-name').value = e.target.value;
+          syncViewerName(e.target.value);
+        });
+      }
       const initialCode = localStorage.getItem('np_security_code') || '';
       $('viewer-code').value = initialCode;
       $('code-gate-input').value = initialCode;
@@ -1972,6 +2086,10 @@
 
     $('code-gate-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if ($('code-gate-name') && $('code-gate-name').value.trim()) {
+        $('viewer-name').value = $('code-gate-name').value.trim();
+        try { localStorage.setItem('np_viewer_name', $('viewer-name').value); } catch {}
+      }
       const val = ($('code-gate-input').value || '').trim();
       const ok = await verifySecurityCode(val, true);
       if (!ok) {
@@ -1992,7 +2110,7 @@
           'ngrok-skip-browser-warning': '1',
           'bypass-tunnel-reminder': '1',
         },
-        body: JSON.stringify({ by, code, ...extra }),
+        body: JSON.stringify({ by, senderId: viewerId, code, ...extra }),
       });
       if (res.status === 401) {
         codeVerified = false;
