@@ -661,65 +661,6 @@
       flex-direction: column;
       overflow: hidden;
     }
-    .chat-name-row {
-      flex: none;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      padding: 7px 10px;
-      border-radius: 10px;
-      background: #11141b;
-      border: 1px solid #252b3b;
-    }
-    html.day .chat-name-row {
-      background: #f5f7fb;
-      border-color: #dfe5f0;
-    }
-    .chat-field-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1 1 170px;
-      min-width: 0;
-    }
-    .chat-field-group.code-group {
-      flex: 0 1 155px;
-    }
-    .chat-name-label {
-      flex: none;
-      color: #9ba3b5;
-      font-size: 12.5px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    html.day .chat-name-label {
-      color: #4f596d;
-    }
-    .chat-name-row .viewer-name,
-    .chat-name-row .viewer-code {
-      flex: 1;
-      min-width: 0;
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid #282e3f;
-      background: #171b24;
-      color: var(--text);
-      font: inherit;
-      font-size: 16px;
-    }
-    html.day .chat-name-row .viewer-name,
-    html.day .chat-name-row .viewer-code {
-      background: #ffffff;
-      border-color: #cbd4e3;
-    }
-    .chat-name-row .viewer-code {
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      letter-spacing: 0.08em;
-      text-align: center;
-      max-width: 96px;
-    }
     .code-gate {
       margin-top: 16px;
       padding: 16px;
@@ -1260,16 +1201,6 @@
 
       <div class="bottom-dock">
         <section id="chat-section" class="chat">
-          <div class="chat-name-row">
-            <div class="chat-field-group">
-              <label class="chat-name-label" for="viewer-name">👤 Your name</label>
-              <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Name (optional)" />
-            </div>
-            <div class="chat-field-group code-group">
-              <label class="chat-name-label" for="viewer-code" title="Security code (can be updated anytime)">🔐 Code</label>
-              <input id="viewer-code" class="viewer-code" type="text" inputmode="numeric" maxlength="12" placeholder="Code" />
-            </div>
-          </div>
           <div id="chat-list" class="chat-list">
             <div class="chat-empty">No messages yet — say hi!</div>
           </div>
@@ -1597,7 +1528,7 @@
         return;
       }
 
-      const myName = (($('viewer-name') && $('viewer-name').value) || '').trim() || 'Viewer';
+      const myName = getStoredName() || 'Viewer';
       const sig = messages
         .map((m) => `${m.id}:${m.by || ''}:${m.text || ''}:${JSON.stringify(m.reactions || {})}`)
         .join('|') + `|me=${myName}|vid=${viewerId}|open=${openPickerMsgId ?? ''}`;
@@ -1971,18 +1902,25 @@
     const apiBase = remoteServer ? remoteServer.replace(/\/+$/, '') : '';
     let reqCooldown = false;
 
+    function getStoredName() {
+      try {
+        return (($('code-gate-name') && $('code-gate-name').value) || localStorage.getItem('np_viewer_name') || '').trim();
+      } catch {
+        return (($('code-gate-name') && $('code-gate-name').value) || '').trim();
+      }
+    }
+
     function getStoredCode() {
       try {
-        return ($('viewer-code').value || localStorage.getItem('np_security_code') || '').trim();
+        return (($('code-gate-input') && $('code-gate-input').value) || localStorage.getItem('np_security_code') || '').trim();
       } catch {
-        return ($('viewer-code').value || '').trim();
+        return (($('code-gate-input') && $('code-gate-input').value) || '').trim();
       }
     }
 
     function setStoredCode(code) {
       const cleaned = String(code || '').trim();
-      $('viewer-code').value = cleaned;
-      $('code-gate-input').value = cleaned;
+      if ($('code-gate-input')) $('code-gate-input').value = cleaned;
       try {
         localStorage.setItem('np_security_code', cleaned);
       } catch {}
@@ -2000,7 +1938,7 @@
       if (verifyingCode) return false;
       verifyingCode = true;
       try {
-        const by = (($('viewer-name') && $('viewer-name').value) || ($('code-gate-name') && $('code-gate-name').value) || '').trim();
+        const by = getStoredName();
         const res = await fetch(`${apiBase}/api/verify-code`, {
           method: 'POST',
           headers: {
@@ -2018,7 +1956,6 @@
           codeVerified = true;
           verifiedSessionId = data.codeSessionId || serverSessionId || 'ok';
           $('code-gate-err').classList.add('hidden');
-          $('viewer-code').style.borderColor = '';
           render();
           return true;
         }
@@ -2037,58 +1974,23 @@
       }
     }
 
-    let nameSyncTimer = null;
-    function syncViewerName(rawVal) {
-      const trimmed = (rawVal || '').trim();
-      try { localStorage.setItem('np_viewer_name', trimmed); } catch {}
-      renderChat();
-      if (!codeVerified) return;
-      if (nameSyncTimer) clearTimeout(nameSyncTimer);
-      nameSyncTimer = setTimeout(() => {
-        sendViewerAction('/api/viewer-name').catch(() => {});
-      }, 600);
-    }
-
     try {
       const savedName = localStorage.getItem('np_viewer_name') || '';
-      $('viewer-name').value = savedName;
-      if ($('code-gate-name')) $('code-gate-name').value = savedName;
-      $('viewer-name').addEventListener('input', (e) => {
-        if ($('code-gate-name')) $('code-gate-name').value = e.target.value;
-        syncViewerName(e.target.value);
-      });
       if ($('code-gate-name')) {
+        $('code-gate-name').value = savedName;
         $('code-gate-name').addEventListener('input', (e) => {
-          $('viewer-name').value = e.target.value;
-          syncViewerName(e.target.value);
+          try { localStorage.setItem('np_viewer_name', e.target.value.trim()); } catch {}
+          renderChat();
         });
       }
       const initialCode = localStorage.getItem('np_security_code') || '';
-      $('viewer-code').value = initialCode;
-      $('code-gate-input').value = initialCode;
+      if ($('code-gate-input')) $('code-gate-input').value = initialCode;
     } catch {}
-
-    let codeInputTimer = null;
-    $('viewer-code').addEventListener('input', (e) => {
-      const val = (e.target.value || '').trim();
-      $('code-gate-input').value = val;
-      try { localStorage.setItem('np_security_code', val); } catch {}
-      if (codeInputTimer) clearTimeout(codeInputTimer);
-      codeInputTimer = setTimeout(async () => {
-        if (!val) return;
-        const ok = await verifySecurityCode(val, false);
-        $('viewer-code').style.borderColor = ok ? '#52b54b' : '#e5484d';
-        if (ok) {
-          setTimeout(() => { $('viewer-code').style.borderColor = ''; }, 1200);
-        }
-      }, 450);
-    });
 
     $('code-gate-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      if ($('code-gate-name') && $('code-gate-name').value.trim()) {
-        $('viewer-name').value = $('code-gate-name').value.trim();
-        try { localStorage.setItem('np_viewer_name', $('viewer-name').value); } catch {}
+      if ($('code-gate-name')) {
+        try { localStorage.setItem('np_viewer_name', $('code-gate-name').value.trim()); } catch {}
       }
       const val = ($('code-gate-input').value || '').trim();
       const ok = await verifySecurityCode(val, true);
@@ -2099,7 +2001,7 @@
     });
 
     async function sendViewerAction(endpoint, extra = {}) {
-      const by = ($('viewer-name').value || '').trim();
+      const by = getStoredName();
       const code = getStoredCode();
       const res = await fetch(`${apiBase}${endpoint}`, {
         method: 'POST',
