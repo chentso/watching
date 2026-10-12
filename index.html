@@ -208,46 +208,92 @@
     .controls {
       margin-top: 16px;
       display: flex;
-      gap: 8px;
-      align-items: center;
+      flex-direction: column;
+      gap: 9px;
     }
     .viewer-name {
-      flex: 1;
-      min-width: 0;
-      padding: 8px 11px;
-      border-radius: 9px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
       border: 1px solid #282e3f;
       background: #11141b;
       color: var(--text);
       font: inherit;
-      font-size: 13px;
+      font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
     }
     .viewer-name::placeholder { color: #636b7e; }
-    .pause-btn {
-      flex: none;
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+    .action-btn {
+      flex: 1;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 7px;
-      padding: 8px 14px;
-      border-radius: 9px;
-      border: 1px solid rgba(240, 180, 41, .4);
-      background: rgba(240, 180, 41, .14);
-      color: #f6c453;
+      min-height: 44px;
+      padding: 9px 12px;
+      border-radius: 10px;
       font: inherit;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: background .15s, opacity .15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .15s, opacity .15s, transform .08s;
+    }
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .req-btn {
+      border: 1px solid rgba(94, 168, 255, .4);
+      background: rgba(94, 168, 255, .14);
+      color: #7ab8ff;
+    }
+    .req-btn:hover:not(:disabled) {
+      background: rgba(94, 168, 255, .24);
+    }
+    .pause-btn {
+      border: 1px solid rgba(240, 180, 41, .45);
+      background: rgba(240, 180, 41, .16);
+      color: #f6c453;
     }
     .pause-btn:hover:not(:disabled) {
-      background: rgba(240, 180, 41, .24);
+      background: rgba(240, 180, 41, .26);
     }
-    .pause-btn:disabled {
-      opacity: .45;
+    .action-btn:disabled {
+      opacity: .42;
       cursor: not-allowed;
       border-color: #2a2f3c;
       background: #1f232e;
       color: var(--muted);
+    }
+    @media (max-width: 520px) {
+      body {
+        padding: 12px;
+        align-items: start;
+        padding-top: max(14px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+      }
+      .card {
+        padding: 18px 16px 16px;
+        border-radius: 16px;
+      }
+      .main { gap: 12px; }
+      .icon { width: 44px; height: 44px; }
+      .icon svg { width: 20px; height: 20px; }
+      .title { font-size: 17px; }
+      .site { font-size: 13px; }
+      .btn-row { flex-direction: column; }
+      .history-list { max-height: 240px; }
+      .history-item { align-items: flex-start; padding: 8px 10px; }
+      .history-left { align-items: flex-start; }
+      .history-text {
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.35;
+      }
     }
   </style>
 </head>
@@ -280,7 +326,10 @@
 
     <div class="controls">
       <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Your name (optional)" />
-      <button id="pause-btn" class="pause-btn" type="button" disabled>⏸ Request Pause</button>
+      <div class="btn-row">
+        <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
+        <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause Video</button>
+      </div>
     </div>
 
     <div class="footer">
@@ -360,11 +409,17 @@
             cls: 'paused',
             label: `Paused at ${fmt(item.at)}`,
           };
-        case 'viewer-paused':
+        case 'pause-requested':
           return {
             icon: '✋',
-            cls: 'paused',
+            cls: 'rewind',
             label: `${item.by || 'A viewer'} requested a pause at ${fmt(item.at)}`,
+          };
+        case 'viewer-paused':
+          return {
+            icon: '⏸',
+            cls: 'paused',
+            label: `${item.by || 'A viewer'} paused the video at ${fmt(item.at)}`,
           };
         case 'resumed':
           return {
@@ -484,8 +539,10 @@
         $('current').textContent = '–:––';
         $('duration').textContent = '–:––';
         $('updated').textContent = state ? `Last activity ${ago(now - state.updatedAt)}` : '';
+        $('request-pause-btn').disabled = true;
+        $('request-pause-btn').textContent = '✋ Request Pause';
         $('pause-btn').disabled = true;
-        $('pause-btn').textContent = '⏸ Request Pause';
+        $('pause-btn').textContent = '⏸ Pause Video';
         document.title = 'Now Playing';
         return;
       }
@@ -503,8 +560,12 @@
       setMode(mode);
       card.classList.toggle('live', isLive && !stale);
 
+      if (!reqCooldown) {
+        $('request-pause-btn').disabled = mode !== 'playing';
+        $('request-pause-btn').textContent = '✋ Request Pause';
+      }
       $('pause-btn').disabled = mode !== 'playing';
-      $('pause-btn').textContent = mode === 'paused' ? '⏸ Paused' : '⏸ Request Pause';
+      $('pause-btn').textContent = mode === 'paused' ? '⏸ Video Paused' : '⏸ Pause Video';
 
       $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
       $('title').textContent = state.title || 'Something private 🤫';
@@ -598,6 +659,7 @@
       new URLSearchParams(location.search).get('server') ||
       (!isServedByRelay ? DEFAULT_TUNNEL_URL : null);
     const apiBase = remoteServer ? remoteServer.replace(/\/+$/, '') : '';
+    let reqCooldown = false;
 
     try {
       $('viewer-name').value = localStorage.getItem('np_viewer_name') || '';
@@ -606,24 +668,44 @@
       });
     } catch {}
 
+    async function sendViewerAction(endpoint) {
+      const by = ($('viewer-name').value || '').trim();
+      await fetch(`${apiBase}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Tunnel-Skip-AntiPhishing-Page': 'True',
+          'ngrok-skip-browser-warning': '1',
+          'bypass-tunnel-reminder': '1',
+        },
+        body: JSON.stringify({ by }),
+      });
+    }
+
+    $('request-pause-btn').addEventListener('click', async () => {
+      const btn = $('request-pause-btn');
+      reqCooldown = true;
+      btn.disabled = true;
+      btn.textContent = '✋ Request Sent!';
+      try {
+        await sendViewerAction('/api/request-pause');
+      } catch (err) {
+        console.warn('Pause request failed:', err);
+      }
+      setTimeout(() => {
+        reqCooldown = false;
+        render();
+      }, 2500);
+    });
+
     $('pause-btn').addEventListener('click', async () => {
       const btn = $('pause-btn');
       btn.disabled = true;
       btn.textContent = 'Pausing…';
-      const by = ($('viewer-name').value || '').trim();
       try {
-        await fetch(`${apiBase}/api/request-pause`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Tunnel-Skip-AntiPhishing-Page': 'True',
-            'ngrok-skip-browser-warning': '1',
-            'bypass-tunnel-reminder': '1',
-          },
-          body: JSON.stringify({ by }),
-        });
+        await sendViewerAction('/api/pause');
       } catch (err) {
-        console.warn('Pause request failed:', err);
+        console.warn('Pause failed:', err);
         render();
       }
     });
