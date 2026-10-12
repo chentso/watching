@@ -87,12 +87,28 @@
     }
     .site { color: var(--muted); font-size: 14px; margin-top: 2px; }
     .progress { margin-top: 22px; }
+    .bar-wrap {
+      position: relative;
+      padding: 8px 0;
+      margin: -8px 0;
+      cursor: pointer;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .idle .bar-wrap, .live .bar-wrap {
+      cursor: default;
+      pointer-events: none;
+    }
     .bar {
       position: relative;
       height: 8px;
       border-radius: 999px;
       background: var(--track);
-      overflow: hidden;
+      transition: height .15s ease;
+    }
+    .bar-wrap:hover .bar, .scrubbing .bar {
+      height: 10px;
     }
     .fill {
       position: absolute; inset: 0 auto 0 0;
@@ -101,8 +117,63 @@
       border-radius: inherit;
       transition: width .25s linear;
     }
+    .scrubbing .fill {
+      transition: none !important;
+    }
     .playing .fill { background: var(--accent); }
     .paused .fill { background: var(--paused); }
+    .thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .6);
+      transform: translate(-50%, -50%) scale(0.85);
+      opacity: 0;
+      transition: opacity .15s ease, transform .15s ease, left .25s linear;
+      pointer-events: none;
+    }
+    .playing .thumb { border: 2px solid var(--accent); }
+    .paused .thumb { border: 2px solid var(--paused); }
+    .bar-wrap:hover .thumb, .scrubbing .thumb {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    .scrubbing .thumb {
+      transition: opacity .15s ease, transform .15s ease !important;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .playing .thumb, .paused .thumb {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .seek-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0%;
+      transform: translateX(-50%);
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: #0b0d12;
+      border: 1px solid #2b3142;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s ease;
+    }
+    .bar-wrap:hover .seek-tooltip, .scrubbing .seek-tooltip {
+      opacity: 1;
+    }
+    .live .bar { overflow: hidden; }
+    .live .thumb, .live .seek-tooltip { display: none; }
     .live .fill {
       width: 100% !important;
       background: repeating-linear-gradient(90deg, #e5484d 0 12px, #b8373b 12px 24px);
@@ -211,7 +282,7 @@
       flex-direction: column;
       gap: 9px;
     }
-    .viewer-name {
+    .viewer-name, .seek-input {
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
@@ -221,7 +292,26 @@
       font: inherit;
       font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
     }
-    .viewer-name::placeholder { color: #636b7e; }
+    .viewer-name::placeholder, .seek-input::placeholder { color: #636b7e; }
+    .seek-row {
+      display: flex;
+      gap: 8px;
+    }
+    .seek-input {
+      flex: 1;
+      min-width: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .seek-btn {
+      flex: none;
+      padding: 9px 16px;
+      border: 1px solid rgba(168, 130, 255, .45);
+      background: rgba(168, 130, 255, .16);
+      color: #c5abff;
+    }
+    .seek-btn:hover:not(:disabled) {
+      background: rgba(168, 130, 255, .26);
+    }
     .btn-row {
       display: flex;
       gap: 8px;
@@ -262,6 +352,14 @@
     .pause-btn:hover:not(:disabled) {
       background: rgba(240, 180, 41, .26);
     }
+    .resume-btn {
+      border: 1px solid rgba(82, 181, 75, .45);
+      background: rgba(82, 181, 75, .16);
+      color: #6fd368;
+    }
+    .resume-btn:hover:not(:disabled) {
+      background: rgba(82, 181, 75, .26);
+    }
     .action-btn:disabled {
       opacity: .42;
       cursor: not-allowed;
@@ -285,7 +383,8 @@
       .icon svg { width: 20px; height: 20px; }
       .title { font-size: 17px; }
       .site { font-size: 13px; }
-      .btn-row { flex-direction: column; }
+      .btn-row { flex-wrap: wrap; }
+      .btn-row .req-btn { flex-basis: 100%; }
       .history-list { max-height: 240px; }
       .history-item { align-items: flex-start; padding: 8px 10px; }
       .history-left { align-items: flex-start; }
@@ -317,7 +416,13 @@
     </div>
 
     <div class="progress">
-      <div class="bar"><div id="fill" class="fill"></div></div>
+      <div id="bar-wrap" class="bar-wrap" role="slider" aria-label="Seek video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="seek-tooltip" class="seek-tooltip">0:00</div>
+        <div id="bar" class="bar">
+          <div id="fill" class="fill"></div>
+          <div id="thumb" class="thumb"></div>
+        </div>
+      </div>
       <div class="times">
         <span id="current" class="now">–:––</span>
         <span id="duration">–:––</span>
@@ -328,8 +433,13 @@
       <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Your name (optional)" />
       <div class="btn-row">
         <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
-        <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause Video</button>
+        <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
+        <button id="resume-btn" class="action-btn resume-btn" type="button" disabled>▶ Resume</button>
       </div>
+      <form id="seek-form" class="seek-row" autocomplete="off">
+        <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
+        <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
+      </form>
     </div>
 
     <div class="footer">
@@ -359,6 +469,8 @@
     let name = '';
     let clockOffset = 0; // serverNow - Date.now()
     let connected = false;
+    let isScrubbing = false;
+    let scrubTime = 0;
 
     function fmt(totalSeconds) {
       if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return '–:––';
@@ -367,6 +479,30 @@
       const m = Math.floor((s % 3600) / 60);
       const sec = String(s % 60).padStart(2, '0');
       return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+    }
+
+    function parseTimeInput(raw) {
+      const s = (raw || '').trim().toLowerCase();
+      if (!s) return null;
+      // Colon format: mm:ss or hh:mm:ss
+      if (s.includes(':')) {
+        const parts = s.split(':').map((p) => Number(p.trim()));
+        if (parts.some((n) => !Number.isFinite(n) || n < 0)) return null;
+        if (parts.length === 2) return parts[0] * 60 + parts[1];
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        return null;
+      }
+      // Unit format: e.g. 1h20m, 12m30s, 45s
+      const unitMatch = s.match(/^(?:(\d+(?:\.\d+)?)h)?\s*(?:(\d+(?:\.\d+)?)m)?\s*(?:(\d+(?:\.\d+)?)s)?$/);
+      if (unitMatch && (unitMatch[1] || unitMatch[2] || unitMatch[3])) {
+        const h = Number(unitMatch[1] || 0);
+        const m = Number(unitMatch[2] || 0);
+        const sec = Number(unitMatch[3] || 0);
+        return h * 3600 + m * 60 + sec;
+      }
+      // Plain seconds: e.g. "90"
+      const numVal = Number(s);
+      return Number.isFinite(numVal) && numVal >= 0 ? numVal : null;
     }
 
     function fmtDelta(seconds) {
@@ -420,6 +556,18 @@
             icon: '⏸',
             cls: 'paused',
             label: `${item.by || 'A viewer'} paused the video at ${fmt(item.at)}`,
+          };
+        case 'viewer-resumed':
+          return {
+            icon: '▶',
+            cls: 'resumed',
+            label: `${item.by || 'A viewer'} resumed the video at ${fmt(item.at)}`,
+          };
+        case 'viewer-seeked':
+          return {
+            icon: '🎯',
+            cls: 'forward',
+            label: `${item.by || 'A viewer'} jumped to ${fmt(item.to)} (${fmt(item.from)} → ${fmt(item.to)})`,
           };
         case 'resumed':
           return {
@@ -523,6 +671,14 @@
       $('icon-idle').classList.toggle('hidden', mode !== 'idle');
     }
 
+    function canSeek() {
+      if (!state || !state.active || state.duration == null || state.duration <= 0) return false;
+      const now = Date.now() + clockOffset;
+      const age = Math.max(0, now - state.updatedAt);
+      const stale = age > (state.paused ? STALE_PAUSED_MS : STALE_PLAYING_MS);
+      return !stale;
+    }
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
@@ -531,18 +687,24 @@
 
       if (!state || !state.active) {
         setMode('idle');
-        card.classList.remove('live');
+        card.classList.remove('live', 'scrubbing');
+        isScrubbing = false;
         $('status').textContent = connected ? 'Offline' : 'Connecting…';
         $('title').textContent = 'Nothing playing right now';
         $('site').textContent = '';
         $('fill').style.width = '0%';
+        $('thumb').style.left = '0%';
         $('current').textContent = '–:––';
         $('duration').textContent = '–:––';
         $('updated').textContent = state ? `Last activity ${ago(now - state.updatedAt)}` : '';
         $('request-pause-btn').disabled = true;
         $('request-pause-btn').textContent = '✋ Request Pause';
         $('pause-btn').disabled = true;
-        $('pause-btn').textContent = '⏸ Pause Video';
+        $('pause-btn').textContent = '⏸ Pause';
+        $('resume-btn').disabled = true;
+        $('resume-btn').textContent = '▶ Resume';
+        $('seek-input').disabled = true;
+        $('seek-btn').disabled = true;
         document.title = 'Now Playing';
         return;
       }
@@ -555,6 +717,7 @@
       let t = state.currentTime;
       if (!state.paused && !stale) t += (age / 1000) * state.playbackRate;
       if (!isLive) t = Math.min(t, state.duration);
+      const displayTime = isScrubbing ? scrubTime : t;
 
       const mode = stale ? 'idle' : state.paused ? 'paused' : 'playing';
       setMode(mode);
@@ -565,14 +728,23 @@
         $('request-pause-btn').textContent = '✋ Request Pause';
       }
       $('pause-btn').disabled = mode !== 'playing';
-      $('pause-btn').textContent = mode === 'paused' ? '⏸ Video Paused' : '⏸ Pause Video';
+      $('pause-btn').textContent = '⏸ Pause';
+      $('resume-btn').disabled = mode !== 'paused';
+      $('resume-btn').textContent = '▶ Resume';
+
+      const seekable = !stale && !isLive;
+      $('seek-input').disabled = !seekable;
+      $('seek-btn').disabled = !seekable;
 
       $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
       $('title').textContent = state.title || 'Something private 🤫';
       $('site').textContent = state.site || '';
-      $('current').textContent = fmt(t);
+      $('current').textContent = fmt(displayTime);
       $('duration').textContent = isLive ? 'LIVE' : fmt(state.duration);
-      $('fill').style.width = isLive ? '100%' : `${Math.min(100, (t / state.duration) * 100).toFixed(2)}%`;
+      const pct = isLive ? 100 : Math.min(100, Math.max(0, (displayTime / state.duration) * 100));
+      $('fill').style.width = `${pct.toFixed(2)}%`;
+      $('thumb').style.left = `${pct.toFixed(2)}%`;
+      $('bar-wrap').setAttribute('aria-valuenow', String(Math.round(pct)));
       $('updated').textContent = `Updated ${ago(age)}` +
         (state.playbackRate && state.playbackRate !== 1 ? ` · ${state.playbackRate}×` : '');
 
@@ -668,7 +840,7 @@
       });
     } catch {}
 
-    async function sendViewerAction(endpoint) {
+    async function sendViewerAction(endpoint, extra = {}) {
       const by = ($('viewer-name').value || '').trim();
       await fetch(`${apiBase}${endpoint}`, {
         method: 'POST',
@@ -678,9 +850,97 @@
           'ngrok-skip-browser-warning': '1',
           'bypass-tunnel-reminder': '1',
         },
-        body: JSON.stringify({ by }),
+        body: JSON.stringify({ by, ...extra }),
       });
     }
+
+    async function performSeek(targetSeconds) {
+      if (!canSeek()) return;
+      const clamped = Math.max(0, Math.min(state.duration, targetSeconds));
+      // Optimistically update local playhead so UI stays where the user seeked
+      state.currentTime = clamped;
+      state.updatedAt = Date.now() + clockOffset;
+      render();
+      try {
+        await sendViewerAction('/api/seek', { to: clamped });
+      } catch (err) {
+        console.warn('Seek failed:', err);
+      }
+    }
+
+    // Interactive Seek Bar (mouse + touch via Pointer Events)
+    const barWrap = $('bar-wrap');
+    const barEl = $('bar');
+    const tooltip = $('seek-tooltip');
+
+    function ratioFromEvent(e) {
+      const rect = barEl.getBoundingClientRect();
+      if (!rect.width) return 0;
+      return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    }
+
+    function updateTooltip(ratio) {
+      if (!canSeek()) return;
+      const pct = ratio * 100;
+      tooltip.style.left = `${pct.toFixed(2)}%`;
+      tooltip.textContent = fmt(ratio * state.duration);
+    }
+
+    barWrap.addEventListener('pointermove', (e) => {
+      if (!canSeek()) return;
+      const ratio = ratioFromEvent(e);
+      updateTooltip(ratio);
+      if (isScrubbing) {
+        scrubTime = ratio * state.duration;
+        render();
+      }
+    });
+
+    barWrap.addEventListener('pointerdown', (e) => {
+      if (!canSeek() || (e.button != null && e.button !== 0)) return;
+      e.preventDefault();
+      isScrubbing = true;
+      card.classList.add('scrubbing');
+      try { barWrap.setPointerCapture(e.pointerId); } catch {}
+      const ratio = ratioFromEvent(e);
+      scrubTime = ratio * state.duration;
+      updateTooltip(ratio);
+      render();
+    });
+
+    function finishScrub(e) {
+      if (!isScrubbing) return;
+      const ratio = ratioFromEvent(e);
+      const target = ratio * (state && state.duration ? state.duration : 0);
+      isScrubbing = false;
+      card.classList.remove('scrubbing');
+      try { barWrap.releasePointerCapture(e.pointerId); } catch {}
+      performSeek(target);
+    }
+
+    barWrap.addEventListener('pointerup', finishScrub);
+    barWrap.addEventListener('pointercancel', () => {
+      if (!isScrubbing) return;
+      isScrubbing = false;
+      card.classList.remove('scrubbing');
+      render();
+    });
+
+    // Jump to specific time form
+    $('seek-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!canSeek()) return;
+      const input = $('seek-input');
+      const target = parseTimeInput(input.value);
+      if (target == null || target > state.duration) {
+        input.style.borderColor = '#e5484d';
+        setTimeout(() => { input.style.borderColor = ''; }, 1200);
+        return;
+      }
+      input.value = '';
+      input.blur();
+      await performSeek(target);
+    });
 
     $('request-pause-btn').addEventListener('click', async () => {
       const btn = $('request-pause-btn');
@@ -706,6 +966,18 @@
         await sendViewerAction('/api/pause');
       } catch (err) {
         console.warn('Pause failed:', err);
+        render();
+      }
+    });
+
+    $('resume-btn').addEventListener('click', async () => {
+      const btn = $('resume-btn');
+      btn.disabled = true;
+      btn.textContent = 'Resuming…';
+      try {
+        await sendViewerAction('/api/resume');
+      } catch (err) {
+        console.warn('Resume failed:', err);
         render();
       }
     });
