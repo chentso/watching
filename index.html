@@ -991,8 +991,6 @@
       .icon svg { width: 20px; height: 20px; }
       .title { font-size: 17px; }
       .site { font-size: 13px; }
-      .btn-row { flex-wrap: wrap; }
-      .btn-row .req-btn { flex-basis: 100%; }
       .history-list { max-height: 240px; }
       .history-item { align-items: flex-start; padding: 8px 10px; }
       .history-left { align-items: flex-start; }
@@ -1055,7 +1053,6 @@
         <div class="btn-row">
           <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
           <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
-          <button id="resume-btn" class="action-btn resume-btn" type="button" disabled>▶ Resume</button>
         </div>
         <form id="seek-form" class="seek-row" autocomplete="off">
           <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
@@ -1591,9 +1588,8 @@
         $('request-pause-btn').disabled = true;
         $('request-pause-btn').textContent = '✋ Request Pause';
         $('pause-btn').disabled = true;
+        $('pause-btn').className = 'action-btn pause-btn';
         $('pause-btn').textContent = '⏸ Pause';
-        $('resume-btn').disabled = true;
-        $('resume-btn').textContent = '▶ Resume';
         $('seek-input').disabled = true;
         $('seek-btn').disabled = true;
         document.title = 'Now Playing';
@@ -1618,10 +1614,10 @@
         $('request-pause-btn').disabled = mode !== 'playing';
         $('request-pause-btn').textContent = '✋ Request Pause';
       }
-      $('pause-btn').disabled = mode !== 'playing';
-      $('pause-btn').textContent = '⏸ Pause';
-      $('resume-btn').disabled = mode !== 'paused';
-      $('resume-btn').textContent = '▶ Resume';
+      const isPaused = mode === 'paused';
+      $('pause-btn').disabled = mode === 'idle';
+      $('pause-btn').className = `action-btn ${isPaused ? 'resume-btn' : 'pause-btn'}`;
+      $('pause-btn').textContent = isPaused ? '▶ Resume' : '⏸ Pause';
 
       const seekable = !stale && !isLive;
       $('seek-input').disabled = !seekable;
@@ -1965,25 +1961,15 @@
     });
 
     $('pause-btn').addEventListener('click', async () => {
+      if (!state || !state.active) return;
       const btn = $('pause-btn');
+      const wasPaused = Boolean(state.paused);
       btn.disabled = true;
-      btn.textContent = 'Pausing…';
+      btn.textContent = wasPaused ? 'Resuming…' : 'Pausing…';
       try {
-        await sendViewerAction('/api/pause');
+        await sendViewerAction(wasPaused ? '/api/resume' : '/api/pause');
       } catch (err) {
-        console.warn('Pause failed:', err);
-        render();
-      }
-    });
-
-    $('resume-btn').addEventListener('click', async () => {
-      const btn = $('resume-btn');
-      btn.disabled = true;
-      btn.textContent = 'Resuming…';
-      try {
-        await sendViewerAction('/api/resume');
-      } catch (err) {
-        console.warn('Resume failed:', err);
+        console.warn(wasPaused ? 'Resume failed:' : 'Pause failed:', err);
         render();
       }
     });
