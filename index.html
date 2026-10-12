@@ -16,14 +16,14 @@
       --track: #2a2f3c;
     }
     html.day {
-      --bg: #f0f4f9;
-      --card: #ffffff;
-      --text: #161b26;
-      --muted: #5a6478;
-      --accent: #2e9e28;
-      --paused: #d99000;
-      --off: #8c96ab;
-      --track: #dce2ee;
+      --bg: #0f2038;
+      --card: #152b4a;
+      --text: #ffffff;
+      --muted: #b8cde8;
+      --accent: #38b847;
+      --paused: #f5b82e;
+      --off: #7b96ba;
+      --track: #24436e;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -44,7 +44,7 @@
       transition: background .2s ease, color .2s ease;
     }
     html.day body {
-      background: radial-gradient(1200px 600px at 50% -10%, #dfe8f5 0%, var(--bg) 60%);
+      background: radial-gradient(1200px 600px at 50% -10%, #1e3d6b 0%, var(--bg) 60%);
     }
     .card {
       width: min(560px, 100%);
@@ -61,8 +61,8 @@
       transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
     html.day .card {
-      border-color: #d8e0ed;
-      box-shadow: 0 14px 40px rgba(18, 28, 45, .09);
+      border-color: #2b4c7e;
+      box-shadow: 0 18px 50px rgba(5, 12, 24, .55);
     }
     .header {
       flex: none;
@@ -102,12 +102,12 @@
       background: #2a3040;
     }
     html.day .theme-btn {
-      background: #edf1f7;
-      border-color: #d0d9e8;
-      color: #2c3547;
+      background: #1a355b;
+      border-color: #31588f;
+      color: #ffffff;
     }
     html.day .theme-btn:hover {
-      background: #e1e8f3;
+      background: #234575;
     }
     .badge {
       display: inline-flex;
@@ -120,9 +120,9 @@
       font-size: 12px;
     }
     html.day .badge {
-      background: #edf1f7;
-      color: #364052;
-      border: 1px solid #dce3ef;
+      background: #1a355b;
+      color: #ffffff;
+      border: 1px solid #31588f;
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
     .playing .dot { background: var(--accent); box-shadow: 0 0 0 0 rgba(82, 181, 75, .7); animation: pulse 1.6s infinite; }
@@ -154,7 +154,7 @@
       color: var(--off);
     }
     html.day .icon {
-      background: #eef2f8;
+      background: #1a355b;
     }
     .playing .icon { color: var(--accent); }
     .paused .icon { color: var(--paused); }
@@ -360,7 +360,7 @@
       overflow: hidden;
     }
     html.day .bottom-dock {
-      border-top-color: #e1e7f0;
+      border-top-color: #264470;
     }
     .history {
       flex: 1 1 auto;
@@ -393,8 +393,8 @@
       animation: fadeIn .25s ease-out;
     }
     html.day .history-item {
-      background: #f5f7fb;
-      border: 1px solid #e3e8f2;
+      background: #173154;
+      border: 1px solid #2b4e7d;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-4px); }
@@ -417,15 +417,15 @@
       background: #202534;
       font-size: 12px;
     }
-    html.day .history-tag { background: #e6ebf5; }
+    html.day .history-tag { background: #203f6b; }
     .history-tag.rewind { background: rgba(94, 168, 255, .15); color: #6eb2ff; }
     .history-tag.forward { background: rgba(168, 130, 255, .15); color: #b99aff; }
     .history-tag.paused { background: rgba(240, 180, 41, .15); color: var(--paused); }
     .history-tag.resumed, .history-tag.started { background: rgba(82, 181, 75, .15); color: var(--accent); }
-    html.day .history-tag.rewind { background: rgba(24, 119, 242, .12); color: #1565c0; }
-    html.day .history-tag.forward { background: rgba(124, 58, 237, .12); color: #6d28d9; }
-    html.day .history-tag.paused { background: rgba(217, 144, 0, .15); color: #b27400; }
-    html.day .history-tag.resumed, html.day .history-tag.started { background: rgba(46, 158, 40, .14); color: #23801e; }
+    html.day .history-tag.rewind { background: #1d467a; color: #ffffff; }
+    html.day .history-tag.forward { background: #3b2d78; color: #ffffff; }
+    html.day .history-tag.paused { background: #705012; color: #ffffff; }
+    html.day .history-tag.resumed, html.day .history-tag.started { background: #1e6429; color: #ffffff; }
     .history-text {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -433,7 +433,7 @@
       color: #d7dce8;
     }
     html.day .history-text {
-      color: #2c3547;
+      color: #ffffff;
     }
     .history-text strong {
       color: var(--text);
@@ -466,14 +466,15 @@
       border-color: #8f6bff;
     }
     html.day .seek-input {
-      background: #ffffff;
-      border-color: #cbd4e3;
+      background: #10233d;
+      border-color: #31588f;
+      color: #ffffff;
     }
     html.day .seek-input:focus {
-      border-color: #7c3aed;
+      border-color: #6eb2ff;
     }
     .seek-input::placeholder { color: #636b7e; }
-    html.day .seek-input::placeholder { color: #8892a6; }
+    html.day .seek-input::placeholder { color: rgba(255, 255, 255, .6); }
     .seek-row {
       display: flex;
       gap: 8px;
@@ -494,12 +495,12 @@
       background: rgba(168, 130, 255, .26);
     }
     html.day .seek-btn {
-      border-color: rgba(124, 58, 237, .4);
-      background: rgba(124, 58, 237, .1);
-      color: #6d28d9;
+      border-color: #3b6db3;
+      background: #1d4478;
+      color: #ffffff;
     }
     html.day .seek-btn:hover:not(:disabled) {
-      background: rgba(124, 58, 237, .18);
+      background: #255491;
     }
     .btn-row {
       display: flex;
@@ -534,12 +535,12 @@
       background: rgba(94, 168, 255, .24);
     }
     html.day .req-btn {
-      border-color: rgba(24, 119, 242, .4);
-      background: rgba(24, 119, 242, .1);
-      color: #1565c0;
+      border-color: #3b6db3;
+      background: #1c3f70;
+      color: #ffffff;
     }
     html.day .req-btn:hover:not(:disabled) {
-      background: rgba(24, 119, 242, .18);
+      background: #244f8a;
     }
     .pause-btn {
       border: 1px solid rgba(240, 180, 41, .45);
@@ -550,12 +551,12 @@
       background: rgba(240, 180, 41, .26);
     }
     html.day .pause-btn {
-      border-color: rgba(217, 144, 0, .45);
-      background: rgba(217, 144, 0, .12);
-      color: #a86c00;
+      border-color: #3b6db3;
+      background: #1c3f70;
+      color: #ffffff;
     }
     html.day .pause-btn:hover:not(:disabled) {
-      background: rgba(217, 144, 0, .22);
+      background: #244f8a;
     }
     .resume-btn {
       border: 1px solid rgba(82, 181, 75, .45);
@@ -566,12 +567,12 @@
       background: rgba(82, 181, 75, .26);
     }
     html.day .resume-btn {
-      border-color: rgba(46, 158, 40, .45);
-      background: rgba(46, 158, 40, .12);
-      color: #1f7a1a;
+      border-color: #3aa34b;
+      background: #1e6429;
+      color: #ffffff;
     }
     html.day .resume-btn:hover:not(:disabled) {
-      background: rgba(46, 158, 40, .22);
+      background: #257832;
     }
     .action-btn:disabled {
       opacity: .42;
@@ -581,9 +582,9 @@
       color: var(--muted);
     }
     html.day .action-btn:disabled {
-      border-color: #dce2ee;
-      background: #eff2f8;
-      color: #8c96ab;
+      border-color: #264470;
+      background: #132744;
+      color: #88a4c9;
     }
     .more-btn {
       flex: 0 0 auto;
@@ -604,18 +605,18 @@
       color: #c5abff;
     }
     html.day .more-btn {
-      border-color: #d6deec;
-      background: #f0f4fa;
-      color: var(--muted);
+      border-color: #31588f;
+      background: #1a355b;
+      color: #ffffff;
     }
     html.day .more-btn:hover:not(:disabled) {
-      background: #e4ebf6;
-      color: var(--text);
+      background: #234575;
+      color: #ffffff;
     }
     html.day .more-btn.active {
-      border-color: rgba(124, 58, 237, .4);
-      background: rgba(124, 58, 237, .1);
-      color: #6d28d9;
+      border-color: #3aa34b;
+      background: #1e6429;
+      color: #ffffff;
     }
     .chat {
       flex: 1 1 auto;
@@ -635,8 +636,8 @@
       gap: 10px;
     }
     html.day .code-gate {
-      background: linear-gradient(145deg, #f5f8ff, #eef3fb);
-      border-color: rgba(24, 119, 242, 0.35);
+      background: linear-gradient(145deg, #18345c, #122847);
+      border-color: #35629e;
     }
     .code-gate-title {
       font-size: 15px;
@@ -676,17 +677,18 @@
       border-color: #5ea8ff;
     }
     html.day .code-gate-name-input {
-      background: #ffffff;
-      border-color: #cbd4e3;
+      background: #10233d;
+      border-color: #31588f;
+      color: #ffffff;
     }
     html.day .code-gate-name-input:focus {
-      border-color: #1877f2;
+      border-color: #6eb2ff;
     }
     .code-gate-name-input::placeholder {
       color: #636b7e;
     }
     html.day .code-gate-name-input::placeholder {
-      color: #8892a6;
+      color: rgba(255, 255, 255, .6);
     }
     .code-gate-input {
       flex: 1;
@@ -708,11 +710,12 @@
       border-color: #5ea8ff;
     }
     html.day .code-gate-input {
-      background: #ffffff;
-      border-color: #cbd4e3;
+      background: #10233d;
+      border-color: #31588f;
+      color: #ffffff;
     }
     html.day .code-gate-input:focus {
-      border-color: #1877f2;
+      border-color: #6eb2ff;
     }
     .code-gate-input::placeholder {
       font-family: system-ui, -apple-system, sans-serif;
@@ -722,7 +725,7 @@
       color: #636b7e;
     }
     html.day .code-gate-input::placeholder {
-      color: #8892a6;
+      color: rgba(255, 255, 255, .6);
     }
     .code-gate-btn {
       flex: none;
@@ -735,12 +738,12 @@
       background: rgba(94, 168, 255, 0.32);
     }
     html.day .code-gate-btn {
-      border-color: rgba(24, 119, 242, 0.45);
-      background: rgba(24, 119, 242, 0.12);
-      color: #1565c0;
+      border-color: #3aa34b;
+      background: #1e6429;
+      color: #ffffff;
     }
     html.day .code-gate-btn:hover:not(:disabled) {
-      background: rgba(24, 119, 242, 0.22);
+      background: #257832;
     }
     .code-gate-err {
       color: #ff7b7f;
@@ -748,7 +751,7 @@
       font-weight: 500;
     }
     html.day .code-gate-err {
-      color: #d92d20;
+      color: #ff9ea2;
     }
     .chat-list {
       flex: 1 1 auto;
@@ -763,8 +766,8 @@
       border: 1px solid #222736;
     }
     html.day .chat-list {
-      background: #f5f7fb;
-      border-color: #dfe5f0;
+      background: #10223b;
+      border-color: #264673;
     }
     .chat-empty {
       color: #636b7e;
@@ -773,7 +776,7 @@
       padding: 16px 8px;
     }
     html.day .chat-empty {
-      color: #7b869c;
+      color: #b0c6e4;
     }
     .chat-msg {
       position: relative;
@@ -801,27 +804,27 @@
       border-color: rgba(94, 168, 255, .36);
     }
     html.day .chat-msg {
-      background: #ffffff;
-      border-color: #e2e8f2;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+      background: #1b3d6b;
+      border-color: #315e9c;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
     }
     html.day .chat-msg.mine {
-      background: #e4f0ff;
-      border-color: rgba(24, 119, 242, .34);
+      background: #204980;
+      border-color: #3c6fb5;
     }
     .chat-msg.host {
       background: rgba(82, 181, 75, .12);
       border-color: rgba(82, 181, 75, .28);
     }
     html.day .chat-msg.host {
-      background: rgba(46, 158, 40, .09);
-      border-color: rgba(46, 158, 40, .3);
+      background: #1d5e28;
+      border-color: #338a42;
     }
     .chat-msg.picker-open {
       border-color: rgba(122, 184, 255, .45);
     }
     html.day .chat-msg.picker-open {
-      border-color: rgba(24, 119, 242, .5);
+      border-color: #6eb2ff;
     }
     .chat-list,
     .top-controls-pane {
@@ -830,7 +833,7 @@
     }
     html.day .chat-list,
     html.day .top-controls-pane {
-      scrollbar-color: rgba(22, 27, 38, .22) transparent;
+      scrollbar-color: rgba(255, 255, 255, .3) transparent;
     }
     .chat-list::-webkit-scrollbar,
     .top-controls-pane::-webkit-scrollbar {
@@ -854,12 +857,12 @@
     }
     html.day .chat-list::-webkit-scrollbar-thumb,
     html.day .top-controls-pane::-webkit-scrollbar-thumb {
-      background: rgba(22, 27, 38, .2);
-      border-color: rgba(255, 255, 255, .35);
+      background: rgba(255, 255, 255, .28);
+      border-color: rgba(255, 255, 255, .1);
     }
     html.day .chat-list::-webkit-scrollbar-thumb:hover,
     html.day .top-controls-pane::-webkit-scrollbar-thumb:hover {
-      background: rgba(46, 158, 40, .55);
+      background: rgba(70, 195, 87, .7);
     }
     .chat-msg-system {
       align-self: center;
@@ -876,8 +879,8 @@
     html.day .chat-msg-system {
       background: transparent;
       border: none;
-      color: #636e82;
-      opacity: .76;
+      color: rgba(255, 255, 255, .78);
+      opacity: .82;
     }
     .chat-meta {
       display: flex;
@@ -891,29 +894,35 @@
       color: #7ab8ff;
     }
     html.day .chat-author {
-      color: #1565c0;
+      color: #c4dfff;
     }
     .chat-msg.mine .chat-author {
       color: #9ecaff;
     }
     html.day .chat-msg.mine .chat-author {
-      color: #0d47a1;
+      color: #d6e9ff;
     }
     .chat-msg.host .chat-author {
       color: #6fd368;
     }
     html.day .chat-msg.host .chat-author {
-      color: #1f7a1a;
+      color: #d6ffdb;
     }
     .chat-time {
       color: var(--muted);
       font-size: 11px;
       font-variant-numeric: tabular-nums;
     }
+    html.day .chat-time {
+      color: rgba(255, 255, 255, .78);
+    }
     .chat-text {
       color: var(--text);
       line-height: 1.38;
       white-space: pre-wrap;
+    }
+    html.day .chat-text {
+      color: #ffffff;
     }
     .chat-msg-footer {
       display: flex;
@@ -943,12 +952,12 @@
       background: rgba(255, 255, 255, .14);
     }
     html.day .chat-react-pill {
-      border-color: #d4dce9;
-      background: #f0f4fa;
-      color: #2c3547;
+      border-color: rgba(255, 255, 255, .24);
+      background: rgba(15, 32, 56, .55);
+      color: #ffffff;
     }
     html.day .chat-react-pill:hover {
-      background: #e3eaf5;
+      background: rgba(255, 255, 255, .2);
     }
     .chat-react-pill.active {
       border-color: rgba(94, 168, 255, .55);
@@ -956,9 +965,9 @@
       color: #ffffff;
     }
     html.day .chat-react-pill.active {
-      border-color: rgba(24, 119, 242, .55);
-      background: rgba(24, 119, 242, .15);
-      color: #0d47a1;
+      border-color: #48c258;
+      background: #1e6429;
+      color: #ffffff;
     }
     .chat-react-picker {
       display: inline-flex;
@@ -986,9 +995,9 @@
       box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
     }
     html.day .chat-msg.picker-open .chat-react-picker {
-      background: #ffffff;
-      border-color: rgba(24, 119, 242, .4);
-      box-shadow: 0 6px 18px rgba(18, 28, 45, .15);
+      background: #162e4f;
+      border-color: #4b82cc;
+      box-shadow: 0 6px 18px rgba(5, 12, 24, .45);
     }
     @media (hover: none), (pointer: coarse) {
       .chat-msg {
@@ -1022,7 +1031,7 @@
       transform: scale(1.2);
     }
     html.day .chat-react-btn:hover {
-      background: rgba(0, 0, 0, .07);
+      background: rgba(255, 255, 255, .16);
     }
     .chat-emoji-bar {
       flex: none;
@@ -1036,8 +1045,8 @@
       border: 1px solid #222736;
     }
     html.day .chat-emoji-bar {
-      background: #f5f7fb;
-      border-color: #dfe5f0;
+      background: #10223b;
+      border-color: #264673;
     }
     .chat-emoji-list {
       display: flex;
@@ -1063,11 +1072,12 @@
       transform: translateY(-1px) scale(1.1);
     }
     html.day .chat-emoji-quick {
-      background: #ffffff;
-      border-color: #dce3ef;
+      background: #1a355b;
+      border-color: #2d5284;
+      color: #ffffff;
     }
     html.day .chat-emoji-quick:hover {
-      background: #eef3fb;
+      background: #25497a;
     }
     .chat-emoji-quick:active {
       transform: scale(0.95);
@@ -1095,14 +1105,15 @@
       border-color: #52b54b;
     }
     html.day .chat-input {
-      background: #ffffff;
-      border-color: #cbd4e3;
+      background: #162e4f;
+      border-color: #31588f;
+      color: #ffffff;
     }
     html.day .chat-input:focus {
-      border-color: #2e9e28;
+      border-color: #48c258;
     }
     .chat-input::placeholder { color: #636b7e; }
-    html.day .chat-input::placeholder { color: #8892a6; }
+    html.day .chat-input::placeholder { color: rgba(255, 255, 255, .62); }
     .chat-send-btn {
       flex: none;
       padding: 9px 16px;
@@ -1114,12 +1125,12 @@
       background: rgba(82, 181, 75, .28);
     }
     html.day .chat-send-btn {
-      border-color: rgba(46, 158, 40, .45);
-      background: rgba(46, 158, 40, .12);
-      color: #1f7a1a;
+      border-color: #3aa34b;
+      background: #1e6429;
+      color: #ffffff;
     }
     html.day .chat-send-btn:hover:not(:disabled) {
-      background: rgba(46, 158, 40, .22);
+      background: #257832;
     }
     @media (max-width: 520px), (hover: none) and (pointer: coarse) {
       .chat-msg {
