@@ -686,30 +686,27 @@
     .chat-emoji-bar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
+      justify-content: center;
       margin-top: 9px;
-      padding: 6px 10px;
+      padding: 6px 8px;
       border-radius: 10px;
       background: #11141b;
       border: 1px solid #222736;
     }
-    .chat-emoji-label {
-      color: var(--muted);
-      font-size: 11.5px;
-      font-weight: 600;
-    }
     .chat-emoji-list {
       display: flex;
       align-items: center;
-      gap: 5px;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
     }
     .chat-emoji-quick {
+      flex: 1;
       border: 1px solid rgba(255, 255, 255, .08);
       background: rgba(255, 255, 255, .04);
       border-radius: 8px;
-      padding: 5px 8px;
-      font-size: 16px;
+      padding: 6px 0;
+      font-size: 18px;
       line-height: 1;
       cursor: pointer;
       touch-action: manipulation;
@@ -871,7 +868,6 @@
           <div class="chat-empty">No messages yet — say hi!</div>
         </div>
         <div class="chat-emoji-bar">
-          <span class="chat-emoji-label">Quick emoji</span>
           <div id="chat-emoji-list" class="chat-emoji-list">
             <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
             <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
