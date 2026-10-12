@@ -6,24 +6,24 @@
   <title>Now Playing</title>
   <style>
     :root {
-      --bg: #0e1015;
-      --card: #171a22;
-      --text: #eef1f7;
-      --muted: #8a93a6;
-      --accent: #52b54b; /* Emby green */
-      --paused: #f0b429;
-      --off: #5b6375;
-      --track: #2a2f3c;
-    }
-    html.day {
       --bg: #0f2038;
       --card: #152b4a;
       --text: #ffffff;
       --muted: #b8cde8;
-      --accent: #38b847;
+      --accent: #38b847; /* Emby green */
       --paused: #f5b82e;
       --off: #7b96ba;
       --track: #24436e;
+    }
+    html.day {
+      --bg: #f0f4f9;
+      --card: #ffffff;
+      --text: #161b26;
+      --muted: #5a6478;
+      --accent: #2e9e28;
+      --paused: #d99000;
+      --off: #8c96ab;
+      --track: #dce2ee;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -33,7 +33,7 @@
       overflow: hidden;
     }
     body {
-      background: radial-gradient(1200px 600px at 50% -10%, #1b2030 0%, var(--bg) 60%);
+      background: radial-gradient(1200px 600px at 50% -10%, #1e3d6b 0%, var(--bg) 60%);
       color: var(--text);
       font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       display: flex;
@@ -44,7 +44,7 @@
       transition: background .2s ease, color .2s ease;
     }
     html.day body {
-      background: radial-gradient(1200px 600px at 50% -10%, #1e3d6b 0%, var(--bg) 60%);
+      background: radial-gradient(1200px 600px at 50% -10%, #dfe8f5 0%, var(--bg) 60%);
     }
     .card {
       width: min(560px, 100%);
@@ -54,15 +54,15 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--card);
-      border: 1px solid #232838;
+      border: 1px solid #2b4c7e;
       border-radius: 18px;
       padding: 20px 24px 14px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+      box-shadow: 0 18px 50px rgba(5, 12, 24, .55);
       transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
     html.day .card {
-      border-color: #2b4c7e;
-      box-shadow: 0 18px 50px rgba(5, 12, 24, .55);
+      border-color: #d8e0ed;
+      box-shadow: 0 14px 40px rgba(18, 28, 45, .09);
     }
     .header {
       flex: none;
@@ -87,9 +87,9 @@
       gap: 5px;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid #2b3142;
-      background: #20242f;
-      color: var(--text);
+      border: 1px solid #31588f;
+      background: #1a355b;
+      color: #ffffff;
       font: inherit;
       font-weight: 600;
       font-size: 11.5px;
@@ -99,15 +99,15 @@
       transition: background .15s, border-color .15s, color .15s;
     }
     .theme-btn:hover {
-      background: #2a3040;
+      background: #234575;
     }
     html.day .theme-btn {
-      background: #1a355b;
-      border-color: #31588f;
-      color: #ffffff;
+      background: #edf1f7;
+      border-color: #d0d9e8;
+      color: #2c3547;
     }
     html.day .theme-btn:hover {
-      background: #234575;
+      background: #e1e8f3;
     }
     .badge {
       display: inline-flex;
@@ -115,14 +115,16 @@
       gap: 7px;
       padding: 4px 10px;
       border-radius: 999px;
-      background: #20242f;
+      background: #1a355b;
+      border: 1px solid #31588f;
+      color: #ffffff;
       font-weight: 600;
       font-size: 12px;
     }
     html.day .badge {
-      background: #1a355b;
-      color: #ffffff;
-      border: 1px solid #31588f;
+      background: #edf1f7;
+      color: #364052;
+      border: 1px solid #dce3ef;
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
     .playing .dot { background: var(--accent); box-shadow: 0 0 0 0 rgba(82, 181, 75, .7); animation: pulse 1.6s infinite; }
@@ -150,11 +152,11 @@
       width: 52px; height: 52px;
       border-radius: 50%;
       display: grid; place-items: center;
-      background: #222737;
+      background: #1a355b;
       color: var(--off);
     }
     html.day .icon {
-      background: #1a355b;
+      background: #eef2f8;
     }
     .playing .icon { color: var(--accent); }
     .paused .icon { color: var(--paused); }
@@ -356,11 +358,11 @@
       flex-direction: column;
       margin-top: 12px;
       padding-top: 10px;
-      border-top: 1px solid #232838;
+      border-top: 1px solid #264470;
       overflow: hidden;
     }
     html.day .bottom-dock {
-      border-top-color: #264470;
+      border-top-color: #dde3ef;
     }
     .history {
       flex: 1 1 auto;
@@ -387,14 +389,15 @@
       gap: 10px;
       padding: 7px 10px;
       border-radius: 9px;
-      background: #13161d;
+      background: #173154;
+      border: 1px solid #2b4e7d;
       font-size: 13px;
       font-variant-numeric: tabular-nums;
       animation: fadeIn .25s ease-out;
     }
     html.day .history-item {
-      background: #173154;
-      border: 1px solid #2b4e7d;
+      background: #f3f6fb;
+      border: 1px solid #e2e8f2;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-4px); }
@@ -414,26 +417,26 @@
       width: 24px;
       height: 24px;
       border-radius: 6px;
-      background: #202534;
+      background: #203f6b;
       font-size: 12px;
     }
-    html.day .history-tag { background: #203f6b; }
-    .history-tag.rewind { background: rgba(94, 168, 255, .15); color: #6eb2ff; }
-    .history-tag.forward { background: rgba(168, 130, 255, .15); color: #b99aff; }
-    .history-tag.paused { background: rgba(240, 180, 41, .15); color: var(--paused); }
-    .history-tag.resumed, .history-tag.started { background: rgba(82, 181, 75, .15); color: var(--accent); }
-    html.day .history-tag.rewind { background: #1d467a; color: #ffffff; }
-    html.day .history-tag.forward { background: #3b2d78; color: #ffffff; }
-    html.day .history-tag.paused { background: #705012; color: #ffffff; }
-    html.day .history-tag.resumed, html.day .history-tag.started { background: #1e6429; color: #ffffff; }
+    html.day .history-tag { background: #e5ebf5; }
+    .history-tag.rewind { background: #1d467a; color: #ffffff; }
+    .history-tag.forward { background: #3b2d78; color: #ffffff; }
+    .history-tag.paused { background: #705012; color: #ffffff; }
+    .history-tag.resumed, .history-tag.started { background: #1e6429; color: #ffffff; }
+    html.day .history-tag.rewind { background: rgba(45, 122, 229, .15); color: #1e64c8; }
+    html.day .history-tag.forward { background: rgba(124, 82, 224, .15); color: #673ab7; }
+    html.day .history-tag.paused { background: rgba(217, 148, 12, .16); color: #b27400; }
+    html.day .history-tag.resumed, html.day .history-tag.started { background: rgba(46, 158, 68, .16); color: #1e7e34; }
     .history-text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: #d7dce8;
+      color: #ffffff;
     }
     html.day .history-text {
-      color: #ffffff;
+      color: #2c3548;
     }
     .history-text strong {
       color: var(--text);
@@ -454,27 +457,27 @@
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #282e3f;
-      background: #11141b;
-      color: var(--text);
+      border: 1px solid #31588f;
+      background: #10233d;
+      color: #ffffff;
       font: inherit;
       font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
       outline: none;
       transition: border-color .15s;
     }
     .seek-input:focus {
-      border-color: #8f6bff;
-    }
-    html.day .seek-input {
-      background: #10233d;
-      border-color: #31588f;
-      color: #ffffff;
-    }
-    html.day .seek-input:focus {
       border-color: #6eb2ff;
     }
-    .seek-input::placeholder { color: #636b7e; }
-    html.day .seek-input::placeholder { color: rgba(255, 255, 255, .6); }
+    html.day .seek-input {
+      background: #f5f7fb;
+      border-color: #cfd7e6;
+      color: #161b26;
+    }
+    html.day .seek-input:focus {
+      border-color: #7c52e0;
+    }
+    .seek-input::placeholder { color: rgba(255, 255, 255, .6); }
+    html.day .seek-input::placeholder { color: #8892a6; }
     .seek-row {
       display: flex;
       gap: 8px;
@@ -487,20 +490,20 @@
     .seek-btn {
       flex: none;
       padding: 9px 16px;
-      border: 1px solid rgba(168, 130, 255, .45);
-      background: rgba(168, 130, 255, .16);
-      color: #c5abff;
-    }
-    .seek-btn:hover:not(:disabled) {
-      background: rgba(168, 130, 255, .26);
-    }
-    html.day .seek-btn {
-      border-color: #3b6db3;
+      border: 1px solid #3b6db3;
       background: #1d4478;
       color: #ffffff;
     }
-    html.day .seek-btn:hover:not(:disabled) {
+    .seek-btn:hover:not(:disabled) {
       background: #255491;
+    }
+    html.day .seek-btn {
+      border-color: rgba(124, 82, 224, .4);
+      background: rgba(124, 82, 224, .12);
+      color: #5e35b1;
+    }
+    html.day .seek-btn:hover:not(:disabled) {
+      background: rgba(124, 82, 224, .2);
     }
     .btn-row {
       display: flex;
@@ -527,96 +530,96 @@
       transform: scale(0.98);
     }
     .req-btn {
-      border: 1px solid rgba(94, 168, 255, .4);
-      background: rgba(94, 168, 255, .14);
-      color: #7ab8ff;
+      border: 1px solid #3b6db3;
+      background: #1c3f70;
+      color: #ffffff;
     }
     .req-btn:hover:not(:disabled) {
-      background: rgba(94, 168, 255, .24);
+      background: #244f8a;
     }
     html.day .req-btn {
-      border-color: #3b6db3;
-      background: #1c3f70;
-      color: #ffffff;
+      border-color: rgba(45, 122, 229, .38);
+      background: rgba(45, 122, 229, .11);
+      color: #195ec2;
     }
     html.day .req-btn:hover:not(:disabled) {
-      background: #244f8a;
+      background: rgba(45, 122, 229, .18);
     }
     .pause-btn {
-      border: 1px solid rgba(240, 180, 41, .45);
-      background: rgba(240, 180, 41, .16);
-      color: #f6c453;
-    }
-    .pause-btn:hover:not(:disabled) {
-      background: rgba(240, 180, 41, .26);
-    }
-    html.day .pause-btn {
-      border-color: #3b6db3;
+      border: 1px solid #3b6db3;
       background: #1c3f70;
       color: #ffffff;
     }
-    html.day .pause-btn:hover:not(:disabled) {
+    .pause-btn:hover:not(:disabled) {
       background: #244f8a;
     }
+    html.day .pause-btn {
+      border-color: rgba(217, 148, 12, .45);
+      background: rgba(240, 180, 41, .16);
+      color: #9e6500;
+    }
+    html.day .pause-btn:hover:not(:disabled) {
+      background: rgba(240, 180, 41, .26);
+    }
     .resume-btn {
-      border: 1px solid rgba(82, 181, 75, .45);
-      background: rgba(82, 181, 75, .16);
-      color: #6fd368;
-    }
-    .resume-btn:hover:not(:disabled) {
-      background: rgba(82, 181, 75, .26);
-    }
-    html.day .resume-btn {
-      border-color: #3aa34b;
+      border: 1px solid #3aa34b;
       background: #1e6429;
       color: #ffffff;
     }
-    html.day .resume-btn:hover:not(:disabled) {
+    .resume-btn:hover:not(:disabled) {
       background: #257832;
+    }
+    html.day .resume-btn {
+      border-color: rgba(46, 158, 68, .42);
+      background: rgba(82, 181, 75, .15);
+      color: #1d7532;
+    }
+    html.day .resume-btn:hover:not(:disabled) {
+      background: rgba(82, 181, 75, .24);
     }
     .action-btn:disabled {
       opacity: .42;
       cursor: not-allowed;
-      border-color: #2a2f3c;
-      background: #1f232e;
-      color: var(--muted);
-    }
-    html.day .action-btn:disabled {
       border-color: #264470;
       background: #132744;
       color: #88a4c9;
+    }
+    html.day .action-btn:disabled {
+      border-color: #d8dfec;
+      background: #eef2f9;
+      color: #8c96aa;
     }
     .more-btn {
       flex: 0 0 auto;
       min-width: 62px;
       padding: 9px 12px;
       font-size: 13px;
-      border: 1px solid #2b3142;
-      background: #171b24;
-      color: var(--muted);
-    }
-    .more-btn:hover:not(:disabled) {
-      background: #1f2533;
-      color: var(--text);
-    }
-    .more-btn.active {
-      border-color: rgba(168, 130, 255, .45);
-      background: rgba(168, 130, 255, .14);
-      color: #c5abff;
-    }
-    html.day .more-btn {
-      border-color: #31588f;
+      border: 1px solid #31588f;
       background: #1a355b;
       color: #ffffff;
     }
-    html.day .more-btn:hover:not(:disabled) {
+    .more-btn:hover:not(:disabled) {
       background: #234575;
       color: #ffffff;
     }
-    html.day .more-btn.active {
+    .more-btn.active {
       border-color: #3aa34b;
       background: #1e6429;
       color: #ffffff;
+    }
+    html.day .more-btn {
+      border-color: #cfd7e6;
+      background: #f1f4fa;
+      color: #4f596d;
+    }
+    html.day .more-btn:hover:not(:disabled) {
+      background: #e4eaf4;
+      color: #161b26;
+    }
+    html.day .more-btn.active {
+      border-color: rgba(124, 82, 224, .42);
+      background: rgba(124, 82, 224, .12);
+      color: #5e35b1;
     }
     .chat {
       flex: 1 1 auto;
@@ -629,15 +632,15 @@
       margin-top: 16px;
       padding: 16px;
       border-radius: 14px;
-      background: linear-gradient(145deg, rgba(24, 29, 42, 0.96), rgba(17, 20, 29, 0.98));
-      border: 1px solid rgba(122, 184, 255, 0.38);
+      background: linear-gradient(145deg, #18345c, #122847);
+      border: 1px solid #35629e;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
     html.day .code-gate {
-      background: linear-gradient(145deg, #18345c, #122847);
-      border-color: #35629e;
+      background: linear-gradient(145deg, #f3f7ff, #eaf0fb);
+      border-color: rgba(45, 122, 229, 0.35);
     }
     .code-gate-title {
       font-size: 15px;
@@ -665,39 +668,39 @@
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #2d364d;
-      background: #11141b;
-      color: var(--text);
+      border: 1px solid #31588f;
+      background: #10233d;
+      color: #ffffff;
       font: inherit;
       font-size: 16px;
       outline: none;
       transition: border-color .15s;
     }
     .code-gate-name-input:focus {
-      border-color: #5ea8ff;
-    }
-    html.day .code-gate-name-input {
-      background: #10233d;
-      border-color: #31588f;
-      color: #ffffff;
-    }
-    html.day .code-gate-name-input:focus {
       border-color: #6eb2ff;
     }
+    html.day .code-gate-name-input {
+      background: #ffffff;
+      border-color: #c8d2e3;
+      color: #161b26;
+    }
+    html.day .code-gate-name-input:focus {
+      border-color: #2d7ae5;
+    }
     .code-gate-name-input::placeholder {
-      color: #636b7e;
+      color: rgba(255, 255, 255, .6);
     }
     html.day .code-gate-name-input::placeholder {
-      color: rgba(255, 255, 255, .6);
+      color: #8892a6;
     }
     .code-gate-input {
       flex: 1;
       min-width: 0;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #2d364d;
-      background: #11141b;
-      color: var(--text);
+      border: 1px solid #31588f;
+      background: #10233d;
+      color: #ffffff;
       font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
       font-size: 18px;
       font-weight: 700;
@@ -707,51 +710,51 @@
       transition: border-color .15s;
     }
     .code-gate-input:focus {
-      border-color: #5ea8ff;
+      border-color: #6eb2ff;
     }
     html.day .code-gate-input {
-      background: #10233d;
-      border-color: #31588f;
-      color: #ffffff;
+      background: #ffffff;
+      border-color: #c8d2e3;
+      color: #161b26;
     }
     html.day .code-gate-input:focus {
-      border-color: #6eb2ff;
+      border-color: #2d7ae5;
     }
     .code-gate-input::placeholder {
       font-family: system-ui, -apple-system, sans-serif;
       font-size: 14px;
       font-weight: 400;
       letter-spacing: normal;
-      color: #636b7e;
+      color: rgba(255, 255, 255, .6);
     }
     html.day .code-gate-input::placeholder {
-      color: rgba(255, 255, 255, .6);
+      color: #8892a6;
     }
     .code-gate-btn {
       flex: none;
       padding: 10px 18px;
-      border: 1px solid rgba(94, 168, 255, 0.5);
-      background: rgba(94, 168, 255, 0.2);
-      color: #9ecaff;
-    }
-    .code-gate-btn:hover:not(:disabled) {
-      background: rgba(94, 168, 255, 0.32);
-    }
-    html.day .code-gate-btn {
-      border-color: #3aa34b;
+      border: 1px solid #3aa34b;
       background: #1e6429;
       color: #ffffff;
     }
-    html.day .code-gate-btn:hover:not(:disabled) {
+    .code-gate-btn:hover:not(:disabled) {
       background: #257832;
     }
+    html.day .code-gate-btn {
+      border-color: rgba(45, 122, 229, 0.45);
+      background: rgba(45, 122, 229, 0.14);
+      color: #195ec2;
+    }
+    html.day .code-gate-btn:hover:not(:disabled) {
+      background: rgba(45, 122, 229, 0.24);
+    }
     .code-gate-err {
-      color: #ff7b7f;
+      color: #ff9ea2;
       font-size: 12.5px;
       font-weight: 500;
     }
     html.day .code-gate-err {
-      color: #ff9ea2;
+      color: #d93036;
     }
     .chat-list {
       flex: 1 1 auto;
@@ -762,21 +765,21 @@
       gap: 7px;
       padding: 10px;
       border-radius: 12px;
-      background: #11141b;
-      border: 1px solid #222736;
+      background: #10223b;
+      border: 1px solid #264673;
     }
     html.day .chat-list {
-      background: #10223b;
-      border-color: #264673;
+      background: #f5f7fb;
+      border-color: #dfe5f0;
     }
     .chat-empty {
-      color: #636b7e;
+      color: #b0c6e4;
       font-size: 13px;
       text-align: center;
       padding: 16px 8px;
     }
     html.day .chat-empty {
-      color: #b0c6e4;
+      color: #7c879c;
     }
     .chat-msg {
       position: relative;
@@ -787,8 +790,9 @@
       min-width: 150px;
       padding: 7px 11px;
       border-radius: 12px;
-      background: #181c26;
-      border: 1px solid rgba(255, 255, 255, .05);
+      background: #1b3d6b;
+      border: 1px solid #315e9c;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
       font-size: 13.5px;
       word-break: break-word;
     }
@@ -800,40 +804,40 @@
     .chat-msg.mine {
       align-self: flex-end;
       border-bottom-right-radius: 3px;
-      background: rgba(94, 168, 255, .16);
-      border-color: rgba(94, 168, 255, .36);
-    }
-    html.day .chat-msg {
-      background: #1b3d6b;
-      border-color: #315e9c;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
-    }
-    html.day .chat-msg.mine {
       background: #204980;
       border-color: #3c6fb5;
     }
-    .chat-msg.host {
-      background: rgba(82, 181, 75, .12);
-      border-color: rgba(82, 181, 75, .28);
+    html.day .chat-msg {
+      background: #1b3d6b;
+      border-color: #29528a;
+      box-shadow: 0 2px 6px rgba(15, 32, 56, .14);
     }
-    html.day .chat-msg.host {
+    html.day .chat-msg.mine {
+      background: #204980;
+      border-color: #3264a8;
+    }
+    .chat-msg.host {
       background: #1d5e28;
       border-color: #338a42;
     }
+    html.day .chat-msg.host {
+      background: #1d5e28;
+      border-color: #2b7a38;
+    }
     .chat-msg.picker-open {
-      border-color: rgba(122, 184, 255, .45);
+      border-color: #6eb2ff;
     }
     html.day .chat-msg.picker-open {
-      border-color: #6eb2ff;
+      border-color: #2d7ae5;
     }
     .chat-list,
     .top-controls-pane {
       scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, .18) transparent;
+      scrollbar-color: rgba(255, 255, 255, .3) transparent;
     }
     html.day .chat-list,
     html.day .top-controls-pane {
-      scrollbar-color: rgba(255, 255, 255, .3) transparent;
+      scrollbar-color: rgba(24, 39, 68, .24) transparent;
     }
     .chat-list::-webkit-scrollbar,
     .top-controls-pane::-webkit-scrollbar {
@@ -847,22 +851,22 @@
     }
     .chat-list::-webkit-scrollbar-thumb,
     .top-controls-pane::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, .16);
+      background: rgba(255, 255, 255, .28);
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .1);
     }
     .chat-list::-webkit-scrollbar-thumb:hover,
     .top-controls-pane::-webkit-scrollbar-thumb:hover {
-      background: rgba(82, 181, 75, .55);
+      background: rgba(70, 195, 87, .7);
     }
     html.day .chat-list::-webkit-scrollbar-thumb,
     html.day .top-controls-pane::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, .28);
-      border-color: rgba(255, 255, 255, .1);
+      background: rgba(24, 39, 68, .22);
+      border-color: rgba(255, 255, 255, .4);
     }
     html.day .chat-list::-webkit-scrollbar-thumb:hover,
     html.day .top-controls-pane::-webkit-scrollbar-thumb:hover {
-      background: rgba(70, 195, 87, .7);
+      background: rgba(46, 158, 68, .65);
     }
     .chat-msg-system {
       align-self: center;
@@ -870,17 +874,17 @@
       padding: 2px 6px;
       background: transparent;
       border: none;
-      color: var(--muted);
+      color: rgba(255, 255, 255, .78);
       font-size: 11.5px;
       text-align: center;
       line-height: 1.35;
-      opacity: .72;
+      opacity: .82;
     }
     html.day .chat-msg-system {
       background: transparent;
       border: none;
-      color: rgba(255, 255, 255, .78);
-      opacity: .82;
+      color: #5a6478;
+      opacity: .85;
     }
     .chat-meta {
       display: flex;
@@ -891,25 +895,25 @@
     }
     .chat-author {
       font-weight: 650;
-      color: #7ab8ff;
+      color: #c4dfff;
     }
     html.day .chat-author {
       color: #c4dfff;
     }
     .chat-msg.mine .chat-author {
-      color: #9ecaff;
+      color: #d6e9ff;
     }
     html.day .chat-msg.mine .chat-author {
       color: #d6e9ff;
     }
     .chat-msg.host .chat-author {
-      color: #6fd368;
+      color: #d6ffdb;
     }
     html.day .chat-msg.host .chat-author {
       color: #d6ffdb;
     }
     .chat-time {
-      color: var(--muted);
+      color: rgba(255, 255, 255, .78);
       font-size: 11px;
       font-variant-numeric: tabular-nums;
     }
@@ -917,7 +921,7 @@
       color: rgba(255, 255, 255, .78);
     }
     .chat-text {
-      color: var(--text);
+      color: #ffffff;
       line-height: 1.38;
       white-space: pre-wrap;
     }
@@ -940,16 +944,16 @@
       gap: 4px;
       padding: 2px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, .12);
-      background: rgba(255, 255, 255, .05);
-      color: #d7dce8;
+      border: 1px solid rgba(255, 255, 255, .24);
+      background: rgba(15, 32, 56, .55);
+      color: #ffffff;
       font: inherit;
       font-size: 12px;
       cursor: pointer;
       transition: background .12s, border-color .12s;
     }
     .chat-react-pill:hover {
-      background: rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .2);
     }
     html.day .chat-react-pill {
       border-color: rgba(255, 255, 255, .24);
@@ -957,11 +961,11 @@
       color: #ffffff;
     }
     html.day .chat-react-pill:hover {
-      background: rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .22);
     }
     .chat-react-pill.active {
-      border-color: rgba(94, 168, 255, .55);
-      background: rgba(94, 168, 255, .2);
+      border-color: #48c258;
+      background: #1e6429;
       color: #ffffff;
     }
     html.day .chat-react-pill.active {
@@ -988,16 +992,16 @@
       display: inline-flex;
       opacity: 1;
       pointer-events: auto;
-      background: #202636;
-      border: 1px solid rgba(122, 184, 255, .35);
+      background: #162e4f;
+      border: 1px solid #4b82cc;
       border-radius: 999px;
       padding: 3px 6px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+      box-shadow: 0 6px 18px rgba(5, 12, 24, .45);
     }
     html.day .chat-msg.picker-open .chat-react-picker {
-      background: #162e4f;
-      border-color: #4b82cc;
-      box-shadow: 0 6px 18px rgba(5, 12, 24, .45);
+      background: #ffffff;
+      border-color: #b8c7e0;
+      box-shadow: 0 6px 18px rgba(18, 28, 45, .18);
     }
     @media (hover: none), (pointer: coarse) {
       .chat-msg {
@@ -1027,11 +1031,11 @@
       transition: background .12s, transform .1s;
     }
     .chat-react-btn:hover {
-      background: rgba(255, 255, 255, .12);
+      background: rgba(255, 255, 255, .16);
       transform: scale(1.2);
     }
     html.day .chat-react-btn:hover {
-      background: rgba(255, 255, 255, .16);
+      background: rgba(255, 255, 255, .2);
     }
     .chat-emoji-bar {
       flex: none;
@@ -1041,12 +1045,12 @@
       margin-top: 8px;
       padding: 6px 8px;
       border-radius: 10px;
-      background: #11141b;
-      border: 1px solid #222736;
+      background: #10223b;
+      border: 1px solid #264673;
     }
     html.day .chat-emoji-bar {
-      background: #10223b;
-      border-color: #264673;
+      background: #f5f7fb;
+      border-color: #dfe5f0;
     }
     .chat-emoji-list {
       display: flex;
@@ -1057,8 +1061,9 @@
     }
     .chat-emoji-quick {
       flex: 1;
-      border: 1px solid rgba(255, 255, 255, .08);
-      background: rgba(255, 255, 255, .04);
+      border: 1px solid #2d5284;
+      background: #1a355b;
+      color: #ffffff;
       border-radius: 8px;
       padding: 6px 0;
       font-size: 18px;
@@ -1068,16 +1073,16 @@
       transition: background .12s, transform .1s;
     }
     .chat-emoji-quick:hover {
-      background: rgba(255, 255, 255, .14);
+      background: #25497a;
       transform: translateY(-1px) scale(1.1);
     }
     html.day .chat-emoji-quick {
-      background: #1a355b;
-      border-color: #2d5284;
-      color: #ffffff;
+      background: #ffffff;
+      border-color: #dce3ef;
+      color: #161b26;
     }
     html.day .chat-emoji-quick:hover {
-      background: #25497a;
+      background: #eaf0fa;
     }
     .chat-emoji-quick:active {
       transform: scale(0.95);
@@ -1093,40 +1098,40 @@
       min-width: 0;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid #282e3f;
-      background: #11141b;
-      color: var(--text);
+      border: 1px solid #31588f;
+      background: #162e4f;
+      color: #ffffff;
       font: inherit;
       font-size: 16px;
       outline: none;
       transition: border-color .15s;
     }
     .chat-input:focus {
-      border-color: #52b54b;
-    }
-    html.day .chat-input {
-      background: #162e4f;
-      border-color: #31588f;
-      color: #ffffff;
-    }
-    html.day .chat-input:focus {
       border-color: #48c258;
     }
-    .chat-input::placeholder { color: #636b7e; }
-    html.day .chat-input::placeholder { color: rgba(255, 255, 255, .62); }
+    html.day .chat-input {
+      background: #f5f7fb;
+      border-color: #cfd7e6;
+      color: #161b26;
+    }
+    html.day .chat-input:focus {
+      border-color: #2e9e44;
+    }
+    .chat-input::placeholder { color: rgba(255, 255, 255, .62); }
+    html.day .chat-input::placeholder { color: #8892a6; }
     .chat-send-btn {
       flex: none;
       padding: 9px 16px;
-      border: 1px solid rgba(82, 181, 75, .45);
-      background: rgba(82, 181, 75, .18);
-      color: #6fd368;
+      border: 1px solid #3aa34b;
+      background: #1e6429;
+      color: #ffffff;
     }
     .chat-send-btn:hover:not(:disabled) {
-      background: rgba(82, 181, 75, .28);
+      background: #257832;
     }
     html.day .chat-send-btn {
-      border-color: #3aa34b;
-      background: #1e6429;
+      border-color: #2b7a38;
+      background: #1d5e28;
       color: #ffffff;
     }
     html.day .chat-send-btn:hover:not(:disabled) {
