@@ -132,7 +132,19 @@
       70% { box-shadow: 0 0 0 8px rgba(82, 181, 75, 0); }
       100% { box-shadow: 0 0 0 0 rgba(82, 181, 75, 0); }
     }
-    .main { display: flex; align-items: center; gap: 16px; }
+    .main { display: flex; align-items: center; gap: 14px; }
+    .main.thumb-expanded {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .main-top-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1;
+    }
     .icon {
       flex: none;
       width: 52px; height: 52px;
@@ -147,7 +159,53 @@
     .playing .icon { color: var(--accent); }
     .paused .icon { color: var(--paused); }
     .icon svg { width: 24px; height: 24px; fill: currentColor; }
-    .titles { min-width: 0; }
+    .preview-wrap {
+      position: relative;
+      flex: none;
+      width: 128px;
+      aspect-ratio: 16 / 9;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0b0d12;
+      border: 1px solid #282f42;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .38);
+      cursor: pointer;
+      user-select: none;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .preview-wrap:hover {
+      border-color: rgba(122, 184, 255, .55);
+    }
+    html.day .preview-wrap {
+      border-color: #cbd4e3;
+      box-shadow: 0 4px 14px rgba(18, 28, 45, .12);
+    }
+    .main.thumb-expanded .preview-wrap {
+      width: 100%;
+      max-height: 210px;
+      border-radius: 12px;
+    }
+    .preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .preview-badge {
+      position: absolute;
+      right: 5px;
+      bottom: 5px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: rgba(11, 13, 18, .76);
+      color: #eef1f7;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+    .titles { min-width: 0; flex: 1; }
     .title {
       font-size: 20px;
       font-weight: 650;
@@ -159,7 +217,7 @@
       word-break: break-word;
     }
     .site { color: var(--muted); font-size: 14px; margin-top: 2px; }
-    .progress { margin-top: 22px; }
+    .progress { margin-top: 18px; }
     .bar-wrap {
       position: relative;
       padding: 8px 0;
@@ -287,7 +345,7 @@
     }
     .top-controls-pane {
       flex: 0 0 auto;
-      max-height: 46%;
+      max-height: 54%;
       overflow-y: auto;
       padding-right: 2px;
     }
@@ -1080,15 +1138,21 @@
 
     <div id="unlocked-body">
       <div class="top-controls-pane">
-        <div class="main">
-          <div class="icon" aria-hidden="true">
-            <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
-            <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
-            <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
+        <div id="main-box" class="main">
+          <div class="main-top-row">
+            <div class="icon" aria-hidden="true">
+              <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
+              <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+              <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
+            </div>
+            <div class="titles">
+              <div id="title" class="title">Waiting for a signal…</div>
+              <div id="site" class="site"></div>
+            </div>
           </div>
-          <div class="titles">
-            <div id="title" class="title">Waiting for a signal…</div>
-            <div id="site" class="site"></div>
+          <div id="preview-wrap" class="preview-wrap hidden" title="Tap to toggle larger preview">
+            <img id="preview-img" class="preview-img" alt="Live video preview" />
+            <span id="preview-badge" class="preview-badge">⛶</span>
           </div>
         </div>
 
@@ -1617,6 +1681,21 @@
       $('unlocked-body').classList.toggle('hidden', locked);
     }
 
+    let thumbExpanded = false;
+    try {
+      thumbExpanded = localStorage.getItem('np_thumb_expanded') === '1';
+    } catch {}
+    function syncThumbExpandedUI() {
+      $('main-box').classList.toggle('thumb-expanded', thumbExpanded);
+      $('preview-badge').textContent = thumbExpanded ? '🗕' : '⛶';
+    }
+    syncThumbExpandedUI();
+    $('preview-wrap').addEventListener('click', () => {
+      thumbExpanded = !thumbExpanded;
+      try { localStorage.setItem('np_thumb_expanded', thumbExpanded ? '1' : '0'); } catch {}
+      syncThumbExpandedUI();
+    });
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
@@ -1637,6 +1716,7 @@
         setMode('idle');
         card.classList.remove('live', 'scrubbing');
         isScrubbing = false;
+        $('preview-wrap').classList.add('hidden');
         $('status').textContent = connected ? 'Offline' : 'Connecting…';
         $('title').textContent = 'Nothing playing right now';
         $('site').textContent = '';
@@ -1669,6 +1749,15 @@
       const mode = stale ? 'idle' : state.paused ? 'paused' : 'playing';
       setMode(mode);
       card.classList.toggle('live', isLive && !stale);
+
+      if (state.thumbnail && !stale) {
+        $('preview-wrap').classList.remove('hidden');
+        if ($('preview-img').getAttribute('src') !== state.thumbnail) {
+          $('preview-img').setAttribute('src', state.thumbnail);
+        }
+      } else {
+        $('preview-wrap').classList.add('hidden');
+      }
 
       if (!reqCooldown) {
         $('request-pause-btn').disabled = mode !== 'playing';
