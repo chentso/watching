@@ -26,14 +26,21 @@
       --track: #dce2ee;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      overflow: hidden;
+    }
     body {
       background: radial-gradient(1200px 600px at 50% -10%, #1b2030 0%, var(--bg) 60%);
       color: var(--text);
       font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      display: grid;
-      place-items: center;
-      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
       transition: background .2s ease, color .2s ease;
     }
     html.day body {
@@ -41,10 +48,15 @@
     }
     .card {
       width: min(560px, 100%);
+      height: min(840px, 100%);
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       background: var(--card);
       border: 1px solid #232838;
       border-radius: 18px;
-      padding: 24px 26px 22px;
+      padding: 20px 24px 14px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
       transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
@@ -53,11 +65,12 @@
       box-shadow: 0 14px 40px rgba(18, 28, 45, .09);
     }
     .header {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
       color: var(--muted);
       font-size: 13px;
       letter-spacing: .06em;
@@ -256,7 +269,7 @@
     }
     .times .now { color: var(--text); font-weight: 600; }
     .footer {
-      margin-top: 18px;
+      margin-top: 12px;
       color: var(--muted);
       font-size: 12px;
       display: flex;
@@ -265,14 +278,45 @@
     }
     .idle .progress { opacity: .35; }
     .hidden { display: none !important; }
-    .history {
+    #unlocked-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .top-controls-pane {
+      flex: 0 0 auto;
+      max-height: 46%;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .bottom-dock {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #232838;
+      overflow: hidden;
+    }
+    html.day .bottom-dock {
+      border-top-color: #e1e7f0;
+    }
+    .history {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .history-list {
+      flex: 1 1 auto;
+      min-height: 0;
       list-style: none;
       margin: 0;
       padding: 0;
-      max-height: 240px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -476,8 +520,9 @@
       color: #8c96ab;
     }
     .tabs-bar {
-      margin-top: 18px;
-      padding-top: 16px;
+      flex: none;
+      margin-top: 10px;
+      padding-top: 10px;
       border-top: 1px solid #232838;
       display: flex;
       gap: 8px;
@@ -551,16 +596,21 @@
       background: rgba(46, 158, 40, .2);
       color: #1b6917;
     }
-    .chat, .history {
-      margin-top: 12px;
+    .chat {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .chat-name-row {
+      flex: none;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;
-      margin-bottom: 10px;
-      padding: 8px 11px;
+      margin-bottom: 8px;
+      padding: 7px 10px;
       border-radius: 10px;
       background: #11141b;
       border: 1px solid #252b3b;
@@ -698,7 +748,8 @@
       color: #d92d20;
     }
     .chat-list {
-      max-height: 240px;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -889,10 +940,11 @@
       background: rgba(0, 0, 0, .07);
     }
     .chat-emoji-bar {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 9px;
+      margin-top: 8px;
       padding: 6px 8px;
       border-radius: 10px;
       background: #11141b;
@@ -936,6 +988,7 @@
       transform: scale(0.95);
     }
     .chat-form {
+      flex: none;
       display: flex;
       gap: 8px;
       margin-top: 8px;
@@ -977,21 +1030,24 @@
     }
     @media (max-width: 520px) {
       body {
-        padding: 12px;
-        align-items: start;
-        padding-top: max(14px, env(safe-area-inset-top));
-        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        padding: 0;
+        justify-content: stretch;
       }
       .card {
-        padding: 18px 16px 16px;
-        border-radius: 16px;
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+        border: none;
+        padding: max(12px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom));
       }
       .main { gap: 12px; }
       .icon { width: 44px; height: 44px; }
       .icon svg { width: 20px; height: 20px; }
       .title { font-size: 17px; }
       .site { font-size: 13px; }
-      .history-list { max-height: 240px; }
+      .progress { margin-top: 14px; }
+      .controls { margin-top: 12px; }
       .history-item { align-items: flex-start; padding: 8px 10px; }
       .history-left { align-items: flex-start; }
       .history-text {
@@ -1023,92 +1079,96 @@
     </div>
 
     <div id="unlocked-body">
-      <div class="main">
-        <div class="icon" aria-hidden="true">
-          <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
-          <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
-          <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
-        </div>
-        <div class="titles">
-          <div id="title" class="title">Waiting for a signal…</div>
-          <div id="site" class="site"></div>
-        </div>
-      </div>
-
-      <div class="progress">
-        <div id="bar-wrap" class="bar-wrap" role="slider" aria-label="Seek video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="seek-tooltip" class="seek-tooltip">0:00</div>
-          <div id="bar" class="bar">
-            <div id="fill" class="fill"></div>
-            <div id="thumb" class="thumb"></div>
+      <div class="top-controls-pane">
+        <div class="main">
+          <div class="icon" aria-hidden="true">
+            <svg id="icon-play" class="hidden" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>
+            <svg id="icon-pause" class="hidden" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+            <svg id="icon-idle" viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5v2h8v-2h5a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 14H3V5h18z"/></svg>
+          </div>
+          <div class="titles">
+            <div id="title" class="title">Waiting for a signal…</div>
+            <div id="site" class="site"></div>
           </div>
         </div>
-        <div class="times">
-          <span id="current" class="now">–:––</span>
-          <span id="duration">–:––</span>
-        </div>
-      </div>
 
-      <div class="controls">
-        <div class="btn-row">
-          <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
-          <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
-        </div>
-        <form id="seek-form" class="seek-row" autocomplete="off">
-          <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
-          <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
-        </form>
-      </div>
-
-      <div class="footer">
-        <span id="updated"></span>
-        <span id="conn"></span>
-      </div>
-
-      <div class="tabs-bar" role="tablist">
-        <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
-          <span>💬 Live Chat</span>
-          <span id="chat-count" class="tab-count">0</span>
-        </button>
-        <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
-          <span>📜 Recent Activity</span>
-          <span id="history-count" class="tab-count">0</span>
-        </button>
-      </div>
-
-      <section id="chat-section" class="chat">
-        <div class="chat-name-row">
-          <div class="chat-field-group">
-            <label class="chat-name-label" for="viewer-name">👤 Your name</label>
-            <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Name (optional)" />
+        <div class="progress">
+          <div id="bar-wrap" class="bar-wrap" role="slider" aria-label="Seek video" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="seek-tooltip" class="seek-tooltip">0:00</div>
+            <div id="bar" class="bar">
+              <div id="fill" class="fill"></div>
+              <div id="thumb" class="thumb"></div>
+            </div>
           </div>
-          <div class="chat-field-group code-group">
-            <label class="chat-name-label" for="viewer-code" title="Security code (can be updated anytime)">🔐 Code</label>
-            <input id="viewer-code" class="viewer-code" type="text" inputmode="numeric" maxlength="12" placeholder="Code" />
+          <div class="times">
+            <span id="current" class="now">–:––</span>
+            <span id="duration">–:––</span>
           </div>
         </div>
-        <div id="chat-list" class="chat-list">
-          <div class="chat-empty">No messages yet — say hi!</div>
-        </div>
-        <div class="chat-emoji-bar">
-          <div id="chat-emoji-list" class="chat-emoji-list">
-            <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
-            <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
-            <button type="button" class="chat-emoji-quick" data-emoji="🔥" title="Insert 🔥">🔥</button>
-            <button type="button" class="chat-emoji-quick" data-emoji="😮" title="Insert 😮">😮</button>
-            <button type="button" class="chat-emoji-quick" data-emoji="👏" title="Insert 👏">👏</button>
-            <button type="button" class="chat-emoji-quick" data-emoji="😭" title="Insert 😭">😭</button>
-          </div>
-        </div>
-        <form id="chat-form" class="chat-form" autocomplete="off">
-          <input id="chat-input" class="chat-input" type="text" maxlength="500" placeholder="Write a message…" />
-          <button id="chat-send-btn" class="action-btn chat-send-btn" type="submit">Send</button>
-        </form>
-      </section>
 
-      <section id="history-section" class="history hidden">
-        <ul id="history-list" class="history-list"></ul>
-      </section>
+        <div class="controls">
+          <div class="btn-row">
+            <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
+            <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
+          </div>
+          <form id="seek-form" class="seek-row" autocomplete="off">
+            <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
+            <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
+          </form>
+        </div>
+
+        <div class="footer">
+          <span id="updated"></span>
+          <span id="conn"></span>
+        </div>
+      </div>
+
+      <div class="bottom-dock">
+        <section id="chat-section" class="chat">
+          <div class="chat-name-row">
+            <div class="chat-field-group">
+              <label class="chat-name-label" for="viewer-name">👤 Your name</label>
+              <input id="viewer-name" class="viewer-name" type="text" maxlength="30" placeholder="Name (optional)" />
+            </div>
+            <div class="chat-field-group code-group">
+              <label class="chat-name-label" for="viewer-code" title="Security code (can be updated anytime)">🔐 Code</label>
+              <input id="viewer-code" class="viewer-code" type="text" inputmode="numeric" maxlength="12" placeholder="Code" />
+            </div>
+          </div>
+          <div id="chat-list" class="chat-list">
+            <div class="chat-empty">No messages yet — say hi!</div>
+          </div>
+          <div class="chat-emoji-bar">
+            <div id="chat-emoji-list" class="chat-emoji-list">
+              <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
+              <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
+              <button type="button" class="chat-emoji-quick" data-emoji="🔥" title="Insert 🔥">🔥</button>
+              <button type="button" class="chat-emoji-quick" data-emoji="😮" title="Insert 😮">😮</button>
+              <button type="button" class="chat-emoji-quick" data-emoji="👏" title="Insert 👏">👏</button>
+              <button type="button" class="chat-emoji-quick" data-emoji="😭" title="Insert 😭">😭</button>
+            </div>
+          </div>
+          <form id="chat-form" class="chat-form" autocomplete="off">
+            <input id="chat-input" class="chat-input" type="text" maxlength="500" placeholder="Write a message…" />
+            <button id="chat-send-btn" class="action-btn chat-send-btn" type="submit">Send</button>
+          </form>
+        </section>
+
+        <section id="history-section" class="history hidden">
+          <ul id="history-list" class="history-list"></ul>
+        </section>
+
+        <div class="tabs-bar" role="tablist">
+          <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
+            <span>💬 Live Chat</span>
+            <span id="chat-count" class="tab-count">0</span>
+          </button>
+          <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
+            <span>📜 Recent Activity</span>
+            <span id="history-count" class="tab-count">0</span>
+          </button>
+        </div>
+      </div>
     </div>
   </main>
 
