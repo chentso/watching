@@ -1576,7 +1576,7 @@
 
         const author = document.createElement('span');
         author.className = 'chat-author';
-        author.textContent = isHost ? `👑 ${m.by || name || 'Host'}` : isMine ? (m.by || myName) : (m.by || 'Viewer');
+        author.textContent = isHost ? (m.by || name || 'Host') : isMine ? (m.by || myName) : (m.by || 'Viewer');
 
         const time = document.createElement('span');
         time.className = 'chat-time';
