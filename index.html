@@ -439,10 +439,108 @@
       line-height: 1.38;
       white-space: pre-wrap;
     }
+    .chat-msg-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 3px;
+    }
+    .chat-react-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      background: rgba(255, 255, 255, .05);
+      color: #d7dce8;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+    }
+    .chat-react-pill:hover {
+      background: rgba(255, 255, 255, .14);
+    }
+    .chat-react-pill.active {
+      border-color: rgba(94, 168, 255, .55);
+      background: rgba(94, 168, 255, .2);
+      color: #ffffff;
+    }
+    .chat-react-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+    .chat-msg:hover .chat-react-picker,
+    .chat-msg:focus-within .chat-react-picker {
+      opacity: 1;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .chat-react-picker {
+        opacity: .85;
+      }
+    }
+    .chat-react-btn {
+      border: none;
+      background: transparent;
+      padding: 2px 5px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .12s, transform .1s;
+    }
+    .chat-react-btn:hover {
+      background: rgba(255, 255, 255, .12);
+      transform: scale(1.2);
+    }
+    .chat-emoji-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 9px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: #11141b;
+      border: 1px solid #222736;
+    }
+    .chat-emoji-label {
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .chat-emoji-list {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chat-emoji-quick {
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: rgba(255, 255, 255, .04);
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background .12s, transform .1s;
+    }
+    .chat-emoji-quick:hover {
+      background: rgba(255, 255, 255, .14);
+      transform: translateY(-1px) scale(1.1);
+    }
+    .chat-emoji-quick:active {
+      transform: scale(0.95);
+    }
     .chat-form {
       display: flex;
       gap: 8px;
-      margin-top: 9px;
+      margin-top: 8px;
     }
     .chat-input {
       flex: 1;
@@ -550,6 +648,17 @@
       <div class="chat-title"><span>💬 Live Chat</span></div>
       <div id="chat-list" class="chat-list">
         <div class="chat-empty">No messages yet — say hi!</div>
+      </div>
+      <div class="chat-emoji-bar">
+        <span class="chat-emoji-label">Quick emoji</span>
+        <div id="chat-emoji-list" class="chat-emoji-list">
+          <button type="button" class="chat-emoji-quick" data-emoji="😂" title="Insert 😂">😂</button>
+          <button type="button" class="chat-emoji-quick" data-emoji="❤️" title="Insert ❤️">❤️</button>
+          <button type="button" class="chat-emoji-quick" data-emoji="🔥" title="Insert 🔥">🔥</button>
+          <button type="button" class="chat-emoji-quick" data-emoji="😮" title="Insert 😮">😮</button>
+          <button type="button" class="chat-emoji-quick" data-emoji="👏" title="Insert 👏">👏</button>
+          <button type="button" class="chat-emoji-quick" data-emoji="😭" title="Insert 😭">😭</button>
+        </div>
       </div>
       <form id="chat-form" class="chat-form" autocomplete="off">
         <input id="chat-input" class="chat-input" type="text" maxlength="500" placeholder="Write a message…" />
@@ -773,6 +882,16 @@
       }
     }
 
+    const QUICK_EMOJIS = ['😂', '❤️', '🔥', '😮', '👏', '😭'];
+
+    async function toggleViewerReaction(messageId, emoji) {
+      try {
+        await sendViewerAction('/api/chat/react', { messageId, emoji, role: 'viewer' });
+      } catch (err) {
+        console.warn('Reaction failed:', err);
+      }
+    }
+
     function renderChat() {
       const list = $('chat-list');
       if (!messages || messages.length === 0) {
@@ -783,9 +902,17 @@
         return;
       }
 
-      const sig = messages.map((m) => m.id).join(',');
+      const myName = (($('viewer-name') && $('viewer-name').value) || '').trim() || 'Viewer';
+      const sig = messages
+        .map((m) => `${m.id}:${JSON.stringify(m.reactions || {})}`)
+        .join('|') + `|me=${myName}`;
       if (list.dataset.sig === sig) return;
+      const prevCount = Number(list.dataset.count || 0);
+      const isNewMsg = messages.length > prevCount;
+      const wasNearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
+      const prevScrollTop = list.scrollTop;
       list.dataset.sig = sig;
+      list.dataset.count = String(messages.length);
 
       const frag = document.createDocumentFragment();
       for (const m of messages) {
@@ -813,11 +940,44 @@
         body.className = 'chat-text';
         body.textContent = m.text || '';
 
-        item.append(meta, body);
+        const footer = document.createElement('div');
+        footer.className = 'chat-msg-footer';
+
+        const reactions = m.reactions && typeof m.reactions === 'object' ? m.reactions : {};
+        for (const [em, users] of Object.entries(reactions)) {
+          if (!Array.isArray(users) || users.length === 0) continue;
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          const iReacted = users.includes(myName);
+          pill.className = `chat-react-pill${iReacted ? ' active' : ''}`;
+          pill.textContent = `${em} ${users.length}`;
+          pill.title = `Reacted by: ${users.join(', ')}`;
+          pill.addEventListener('click', () => toggleViewerReaction(m.id, em));
+          footer.appendChild(pill);
+        }
+
+        const picker = document.createElement('div');
+        picker.className = 'chat-react-picker';
+        for (const em of QUICK_EMOJIS) {
+          const rb = document.createElement('button');
+          rb.type = 'button';
+          rb.className = 'chat-react-btn';
+          rb.textContent = em;
+          rb.title = `React with ${em}`;
+          rb.addEventListener('click', () => toggleViewerReaction(m.id, em));
+          picker.appendChild(rb);
+        }
+        footer.appendChild(picker);
+
+        item.append(meta, body, footer);
         frag.appendChild(item);
       }
       list.replaceChildren(frag);
-      list.scrollTop = list.scrollHeight;
+      if (isNewMsg || wasNearBottom) {
+        list.scrollTop = list.scrollHeight;
+      } else {
+        list.scrollTop = prevScrollTop;
+      }
     }
 
     function setMode(mode) {
@@ -1140,6 +1300,19 @@
         console.warn('Resume failed:', err);
         render();
       }
+    });
+
+    $('chat-emoji-list').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-emoji]');
+      if (!btn) return;
+      const em = btn.getAttribute('data-emoji') || '';
+      const input = $('chat-input');
+      const start = input.selectionStart != null ? input.selectionStart : input.value.length;
+      const end = input.selectionEnd != null ? input.selectionEnd : input.value.length;
+      input.value = input.value.slice(0, start) + em + input.value.slice(end);
+      input.focus();
+      const cursor = start + em.length;
+      try { input.setSelectionRange(cursor, cursor); } catch {}
     });
 
     $('chat-form').addEventListener('submit', async (e) => {
