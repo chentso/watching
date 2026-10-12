@@ -823,24 +823,61 @@
     html.day .chat-msg.picker-open {
       border-color: rgba(24, 119, 242, .5);
     }
+    .chat-list,
+    .top-controls-pane {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, .18) transparent;
+    }
+    html.day .chat-list,
+    html.day .top-controls-pane {
+      scrollbar-color: rgba(22, 27, 38, .22) transparent;
+    }
+    .chat-list::-webkit-scrollbar,
+    .top-controls-pane::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .chat-list::-webkit-scrollbar-track,
+    .top-controls-pane::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 4px 0;
+    }
+    .chat-list::-webkit-scrollbar-thumb,
+    .top-controls-pane::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, .16);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .04);
+    }
+    .chat-list::-webkit-scrollbar-thumb:hover,
+    .top-controls-pane::-webkit-scrollbar-thumb:hover {
+      background: rgba(82, 181, 75, .55);
+    }
+    html.day .chat-list::-webkit-scrollbar-thumb,
+    html.day .top-controls-pane::-webkit-scrollbar-thumb {
+      background: rgba(22, 27, 38, .2);
+      border-color: rgba(255, 255, 255, .35);
+    }
+    html.day .chat-list::-webkit-scrollbar-thumb:hover,
+    html.day .top-controls-pane::-webkit-scrollbar-thumb:hover {
+      background: rgba(46, 158, 40, .55);
+    }
     .chat-msg-system {
       align-self: center;
       max-width: 92%;
-      padding: 3px 11px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .035);
-      border: 1px solid rgba(255, 255, 255, .06);
+      padding: 2px 6px;
+      background: transparent;
+      border: none;
       color: var(--muted);
       font-size: 11.5px;
       text-align: center;
       line-height: 1.35;
-      opacity: .74;
+      opacity: .72;
     }
     html.day .chat-msg-system {
-      background: rgba(18, 28, 45, .04);
-      border-color: rgba(18, 28, 45, .08);
+      background: transparent;
+      border: none;
       color: #636e82;
-      opacity: .78;
+      opacity: .76;
     }
     .chat-meta {
       display: flex;
