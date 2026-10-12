@@ -450,7 +450,7 @@
       flex-direction: column;
       gap: 9px;
     }
-    .viewer-name, .seek-input {
+    .seek-input {
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
@@ -459,13 +459,21 @@
       color: var(--text);
       font: inherit;
       font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
+      outline: none;
+      transition: border-color .15s;
     }
-    html.day .viewer-name, html.day .seek-input {
+    .seek-input:focus {
+      border-color: #8f6bff;
+    }
+    html.day .seek-input {
       background: #ffffff;
       border-color: #cbd4e3;
     }
-    .viewer-name::placeholder, .seek-input::placeholder { color: #636b7e; }
-    html.day .viewer-name::placeholder, html.day .seek-input::placeholder { color: #8892a6; }
+    html.day .seek-input:focus {
+      border-color: #7c3aed;
+    }
+    .seek-input::placeholder { color: #636b7e; }
+    html.day .seek-input::placeholder { color: #8892a6; }
     .seek-row {
       display: flex;
       gap: 8px;
@@ -706,10 +714,18 @@
       color: var(--text);
       font: inherit;
       font-size: 16px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .code-gate-name-input:focus {
+      border-color: #5ea8ff;
     }
     html.day .code-gate-name-input {
       background: #ffffff;
       border-color: #cbd4e3;
+    }
+    html.day .code-gate-name-input:focus {
+      border-color: #1877f2;
     }
     .code-gate-name-input::placeholder {
       color: #636b7e;
@@ -730,10 +746,18 @@
       font-weight: 700;
       letter-spacing: 0.16em;
       text-align: center;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .code-gate-input:focus {
+      border-color: #5ea8ff;
     }
     html.day .code-gate-input {
       background: #ffffff;
       border-color: #cbd4e3;
+    }
+    html.day .code-gate-input:focus {
+      border-color: #1877f2;
     }
     .code-gate-input::placeholder {
       font-family: system-ui, -apple-system, sans-serif;
@@ -1070,10 +1094,18 @@
       color: var(--text);
       font: inherit;
       font-size: 16px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .chat-input:focus {
+      border-color: #52b54b;
     }
     html.day .chat-input {
       background: #ffffff;
       border-color: #cbd4e3;
+    }
+    html.day .chat-input:focus {
+      border-color: #2e9e28;
     }
     .chat-input::placeholder { color: #636b7e; }
     html.day .chat-input::placeholder { color: #8892a6; }
