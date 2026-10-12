@@ -328,6 +328,102 @@
       font-size: 14px;
     }
     .times .now { color: var(--text); font-weight: 600; }
+    .sub-preview {
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: #0d1829;
+      border: 1px solid #1e3558;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    html.day .sub-preview {
+      background: #f1f5fb;
+      border-color: #d0daea;
+    }
+    .sub-preview-line {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #6f84a6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 2px 5px;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+      transition: color .15s ease, background .15s ease;
+    }
+    html.day .sub-preview-line {
+      color: #6c7c96;
+    }
+    .sub-preview-line.seekable {
+      cursor: pointer;
+    }
+    .sub-preview-line.seekable:hover {
+      background: rgba(91, 156, 255, .1);
+      color: #b8ccf0;
+    }
+    html.day .sub-preview-line.seekable:hover {
+      background: rgba(36, 99, 235, .08);
+      color: #2c3e5a;
+    }
+    .sub-preview-line.curr {
+      font-size: 13px;
+      font-weight: 600;
+      color: #eef4ff;
+      background: rgba(62, 207, 142, .11);
+      border-left-color: var(--accent);
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    html.day .sub-preview-line.curr {
+      color: #132038;
+      background: rgba(35, 105, 48, .1);
+      border-left-color: #236930;
+    }
+    .sub-preview-line.curr.gap {
+      background: rgba(91, 156, 255, .07);
+      border-left-color: #4b82cc;
+      color: #c5d6f2;
+    }
+    html.day .sub-preview-line.curr.gap {
+      background: rgba(59, 118, 212, .08);
+      border-left-color: #4b82cc;
+      color: #2b3e5e;
+    }
+    .sub-preview-time {
+      flex: none;
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+      color: #556b8d;
+      min-width: 30px;
+    }
+    html.day .sub-preview-time {
+      color: #7b8ba5;
+    }
+    .sub-preview-line.curr .sub-preview-time {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    html.day .sub-preview-line.curr .sub-preview-time {
+      color: #236930;
+    }
+    .sub-preview-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub-preview-line.empty {
+      opacity: .42;
+      pointer-events: none;
+    }
     .footer {
       margin-top: 12px;
       color: var(--muted);
@@ -1237,6 +1333,21 @@
           </div>
         </div>
 
+        <div id="sub-preview" class="sub-preview hidden" aria-label="Live subtitle preview">
+          <div id="sub-line-prev" class="sub-preview-line prev empty">
+            <span class="sub-preview-time"></span>
+            <span class="sub-preview-text">·</span>
+          </div>
+          <div id="sub-line-curr" class="sub-preview-line curr empty">
+            <span class="sub-preview-time"></span>
+            <span class="sub-preview-text">…</span>
+          </div>
+          <div id="sub-line-next" class="sub-preview-line next empty">
+            <span class="sub-preview-time"></span>
+            <span class="sub-preview-text">·</span>
+          </div>
+        </div>
+
         <div class="controls">
           <div class="btn-row">
             <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
@@ -1731,6 +1842,76 @@
       syncThumbExpandedUI();
     });
 
+    $('sub-preview').addEventListener('click', (e) => {
+      const lineEl = e.target.closest('.sub-preview-line[data-seek-from]');
+      if (!lineEl || !canSeek()) return;
+      const from = Number(lineEl.getAttribute('data-seek-from'));
+      if (Number.isFinite(from) && from >= 0) {
+        performSeek(from);
+      }
+    });
+
+    function updateSubLineEl(el, roleClass, cue, seekable, isGap = false) {
+      if (!el) return;
+      const timeEl = el.querySelector('.sub-preview-time');
+      const textEl = el.querySelector('.sub-preview-text');
+      if (!cue || !cue.content) {
+        el.className = `sub-preview-line ${roleClass} empty`;
+        el.removeAttribute('data-seek-from');
+        el.removeAttribute('title');
+        if (timeEl) timeEl.textContent = '';
+        if (textEl) textEl.textContent = roleClass === 'curr' ? '…' : '·';
+        return;
+      }
+      el.className = `sub-preview-line ${roleClass}${seekable ? ' seekable' : ''}${isGap ? ' gap' : ''}`;
+      if (seekable && Number.isFinite(cue.from)) {
+        el.setAttribute('data-seek-from', String(cue.from));
+        el.setAttribute('title', `Jump to ${fmt(cue.from)}`);
+      } else {
+        el.removeAttribute('data-seek-from');
+        el.removeAttribute('title');
+      }
+      if (timeEl) timeEl.textContent = fmt(cue.from);
+      if (textEl) textEl.textContent = String(cue.content).replace(/\s*\n+\s*/g, ' / ');
+    }
+
+    function renderSubtitlePreview(displayTime, stale, seekable) {
+      const box = $('sub-preview');
+      if (!box) return;
+      const cues = state && Array.isArray(state.subtitles) ? state.subtitles : [];
+      if (!state || !state.active || stale || cues.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.classList.remove('hidden');
+
+      let activeIdx = -1;
+      for (let i = 0; i < cues.length; i++) {
+        if (cues[i].from <= displayTime + 0.08) {
+          activeIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      if (activeIdx === -1) {
+        // Playhead is before the first cue in this window
+        updateSubLineEl($('sub-line-prev'), 'prev', null, false);
+        updateSubLineEl($('sub-line-curr'), 'curr', null, false, true);
+        updateSubLineEl($('sub-line-next'), 'next', cues[0] || null, seekable);
+        return;
+      }
+
+      const currCue = cues[activeIdx];
+      const isGap = displayTime > (currCue.to || currCue.from + 4) + 0.45;
+      const prevCue = activeIdx > 0 ? cues[activeIdx - 1] : null;
+      const nextCue = activeIdx + 1 < cues.length ? cues[activeIdx + 1] : null;
+
+      updateSubLineEl($('sub-line-prev'), 'prev', prevCue, seekable);
+      updateSubLineEl($('sub-line-curr'), 'curr', currCue, seekable, isGap);
+      updateSubLineEl($('sub-line-next'), 'next', nextCue, seekable);
+    }
+
     function render() {
       const now = Date.now() + clockOffset;
       $('heading').textContent = name ? `${name} is watching` : 'Now Playing';
@@ -1751,6 +1932,7 @@
         card.classList.remove('live', 'scrubbing');
         isScrubbing = false;
         $('preview-wrap').classList.add('hidden');
+        $('sub-preview').classList.add('hidden');
         $('status').textContent = connected ? 'Offline' : 'Connecting…';
         $('title').textContent = 'Nothing playing right now';
         $('site').textContent = '';
@@ -1805,6 +1987,7 @@
       const seekable = !stale && !isLive;
       $('seek-input').disabled = !seekable;
       $('seek-btn').disabled = !seekable;
+      renderSubtitlePreview(displayTime, stale, seekable);
 
       $('status').textContent = stale ? 'Signal lost' : state.paused ? 'Paused' : isLive ? 'Live' : 'Playing';
       $('title').textContent = state.title || 'Something private 🤫';
