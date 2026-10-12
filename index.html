@@ -585,82 +585,37 @@
       background: #eff2f8;
       color: #8c96ab;
     }
-    .tabs-bar {
-      flex: none;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid #232838;
-      display: flex;
-      gap: 8px;
-    }
-    html.day .tabs-bar {
-      border-top-color: #e1e7f0;
-    }
-    .tab-btn {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      min-height: 40px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 1px solid #252b3b;
-      background: #12151e;
-      color: var(--muted);
-      font: inherit;
+    .more-btn {
+      flex: 0 0 auto;
+      min-width: 62px;
+      padding: 9px 12px;
       font-size: 13px;
-      font-weight: 650;
-      cursor: pointer;
-      transition: background .15s, color .15s, border-color .15s;
-    }
-    .tab-btn:hover {
-      color: var(--text);
-      background: #181c28;
-    }
-    html.day .tab-btn {
-      background: #f3f6fb;
-      border-color: #dce3ef;
+      border: 1px solid #2b3142;
+      background: #171b24;
       color: var(--muted);
     }
-    html.day .tab-btn:hover {
-      background: #e9eef7;
+    .more-btn:hover:not(:disabled) {
+      background: #1f2533;
       color: var(--text);
     }
-    .tab-btn.active {
-      color: #6fd368;
-      border-color: rgba(82, 181, 75, .45);
-      background: rgba(82, 181, 75, .14);
+    .more-btn.active {
+      border-color: rgba(168, 130, 255, .45);
+      background: rgba(168, 130, 255, .14);
+      color: #c5abff;
     }
-    html.day .tab-btn.active {
-      color: #1f7a1a;
-      border-color: rgba(46, 158, 40, .45);
-      background: rgba(46, 158, 40, .11);
-    }
-    .tab-count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 20px;
-      height: 18px;
-      padding: 0 6px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .08);
+    html.day .more-btn {
+      border-color: #d6deec;
+      background: #f0f4fa;
       color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
     }
-    html.day .tab-count {
-      background: rgba(0, 0, 0, .07);
+    html.day .more-btn:hover:not(:disabled) {
+      background: #e4ebf6;
+      color: var(--text);
     }
-    .tab-btn.active .tab-count {
-      background: rgba(82, 181, 75, .24);
-      color: #9be895;
-    }
-    html.day .tab-btn.active .tab-count {
-      background: rgba(46, 158, 40, .2);
-      color: #1b6917;
+    html.day .more-btn.active {
+      border-color: rgba(124, 58, 237, .4);
+      background: rgba(124, 58, 237, .1);
+      color: #6d28d9;
     }
     .chat {
       flex: 1 1 auto;
@@ -871,19 +826,21 @@
     .chat-msg-system {
       align-self: center;
       max-width: 92%;
-      padding: 4px 12px;
+      padding: 3px 11px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, .05);
-      border: 1px solid rgba(255, 255, 255, .09);
+      background: rgba(255, 255, 255, .035);
+      border: 1px solid rgba(255, 255, 255, .06);
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11.5px;
       text-align: center;
       line-height: 1.35;
+      opacity: .74;
     }
     html.day .chat-msg-system {
-      background: #e9eef7;
-      border-color: #d5deed;
-      color: #525d72;
+      background: rgba(18, 28, 45, .04);
+      border-color: rgba(18, 28, 45, .08);
+      color: #636e82;
+      opacity: .78;
     }
     .chat-meta {
       display: flex;
@@ -1218,8 +1175,9 @@
           <div class="btn-row">
             <button id="request-pause-btn" class="action-btn req-btn" type="button" disabled>✋ Request Pause</button>
             <button id="pause-btn" class="action-btn pause-btn" type="button" disabled>⏸ Pause</button>
+            <button id="more-btn" class="action-btn more-btn" type="button" title="Toggle Jump to time">More</button>
           </div>
-          <form id="seek-form" class="seek-row" autocomplete="off">
+          <form id="seek-form" class="seek-row hidden" autocomplete="off">
             <input id="seek-input" class="seek-input" type="text" maxlength="20" placeholder="Jump to time (e.g. 12:30 or 1:05:00)" disabled />
             <button id="seek-btn" class="action-btn seek-btn" type="submit" disabled>🎯 Jump</button>
           </form>
@@ -1251,21 +1209,6 @@
             <button id="chat-send-btn" class="action-btn chat-send-btn" type="submit">Send</button>
           </form>
         </section>
-
-        <section id="history-section" class="history hidden">
-          <ul id="history-list" class="history-list"></ul>
-        </section>
-
-        <div class="tabs-bar" role="tablist">
-          <button id="tab-btn-chat" class="tab-btn active" type="button" role="tab" aria-selected="true">
-            <span>💬 Live Chat</span>
-            <span id="chat-count" class="tab-count">0</span>
-          </button>
-          <button id="tab-btn-history" class="tab-btn" type="button" role="tab" aria-selected="false">
-            <span>📜 Recent Activity</span>
-            <span id="history-count" class="tab-count">0</span>
-          </button>
-        </div>
       </div>
     </div>
   </main>
@@ -1310,7 +1253,6 @@
     let connected = false;
     let isScrubbing = false;
     let scrubTime = 0;
-    let activeTab = 'chat';
     let viewerId = '';
     try {
       viewerId = localStorage.getItem('np_viewer_id') || '';
@@ -1322,19 +1264,14 @@
       viewerId = 'v_' + Math.random().toString(36).slice(2, 10);
     }
 
-    function switchTab(tab) {
-      activeTab = tab === 'history' ? 'history' : 'chat';
-      const isChat = activeTab === 'chat';
-      $('tab-btn-chat').classList.toggle('active', isChat);
-      $('tab-btn-chat').setAttribute('aria-selected', String(isChat));
-      $('tab-btn-history').classList.toggle('active', !isChat);
-      $('tab-btn-history').setAttribute('aria-selected', String(!isChat));
-      $('chat-section').classList.toggle('hidden', !isChat);
-      $('history-section').classList.toggle('hidden', isChat);
-    }
-
-    $('tab-btn-chat').addEventListener('click', () => switchTab('chat'));
-    $('tab-btn-history').addEventListener('click', () => switchTab('history'));
+    $('more-btn').addEventListener('click', () => {
+      const form = $('seek-form');
+      const open = form.classList.toggle('hidden') === false;
+      $('more-btn').classList.toggle('active', open);
+      if (open && !$('seek-input').disabled) {
+        setTimeout(() => $('seek-input').focus(), 20);
+      }
+    });
 
     function fmt(totalSeconds) {
       if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return '–:––';
@@ -1474,59 +1411,6 @@
       }
     }
 
-    function renderHistory(now) {
-      const list = $('history-list');
-      $('history-count').textContent = String(history ? history.length : 0);
-      if (!history || history.length === 0) {
-        if (list.dataset.sig !== 'empty') {
-          list.dataset.sig = 'empty';
-          list.innerHTML = '<li class="chat-empty">No recent activity yet.</li>';
-        }
-        return;
-      }
-
-      // Rebuild items if count or newest ID/timestamp changed; otherwise just update relative times
-      const sig = history.map((h) => `${h.id}:${h.timestamp}:${h.to ?? ''}`).join('|');
-      if (list.dataset.sig !== sig) {
-        list.dataset.sig = sig;
-        const frag = document.createDocumentFragment();
-        for (const item of history) {
-          const info = describeAction(item);
-          const li = document.createElement('li');
-          li.className = 'history-item';
-          li.dataset.ts = String(item.timestamp);
-
-          const left = document.createElement('div');
-          left.className = 'history-left';
-
-          const tag = document.createElement('span');
-          tag.className = `history-tag ${info.cls}`;
-          tag.textContent = info.icon;
-
-          const text = document.createElement('span');
-          text.className = 'history-text';
-          text.textContent = info.label;
-          text.title = info.label;
-
-          left.append(tag, text);
-
-          const timeEl = document.createElement('span');
-          timeEl.className = 'history-ago';
-          timeEl.textContent = ago(now - item.timestamp);
-
-          li.append(left, timeEl);
-          frag.appendChild(li);
-        }
-        list.replaceChildren(frag);
-      } else {
-        for (const li of list.children) {
-          const ts = Number(li.dataset.ts);
-          const timeEl = li.querySelector('.history-ago');
-          if (timeEl && ts) timeEl.textContent = ago(now - ts);
-        }
-      }
-    }
-
     const QUICK_EMOJIS = ['😂', '❤️', '🔥', '😮', '👏', '😭'];
     let openPickerMsgId = null;
 
@@ -1551,8 +1435,20 @@
 
     function renderChat() {
       const list = $('chat-list');
-      $('chat-count').textContent = String(messages ? messages.length : 0);
-      if (!messages || messages.length === 0) {
+      const timeline = [];
+      if (Array.isArray(history)) {
+        for (const h of history) {
+          timeline.push({ kind: 'activity', ts: h.timestamp || 0, data: h });
+        }
+      }
+      if (Array.isArray(messages)) {
+        for (const m of messages) {
+          timeline.push({ kind: 'msg', ts: m.timestamp || 0, data: m });
+        }
+      }
+      timeline.sort((a, b) => a.ts - b.ts);
+
+      if (timeline.length === 0) {
         if (list.dataset.sig !== 'empty') {
           list.dataset.sig = 'empty';
           list.innerHTML = '<div class="chat-empty">No messages yet — say hi!</div>';
@@ -1561,19 +1457,36 @@
       }
 
       const myName = getStoredName() || 'Viewer';
-      const sig = messages
-        .map((m) => `${m.id}:${m.by || ''}:${m.text || ''}:${JSON.stringify(m.reactions || {})}`)
+      const sig = timeline
+        .map((entry) =>
+          entry.kind === 'activity'
+            ? `a:${entry.data.id}:${entry.ts}:${entry.data.to ?? ''}`
+            : `m:${entry.data.id}:${entry.data.by || ''}:${entry.data.text || ''}:${JSON.stringify(entry.data.reactions || {})}`
+        )
         .join('|') + `|me=${myName}|vid=${viewerId}|open=${openPickerMsgId ?? ''}`;
       if (list.dataset.sig === sig) return;
       const prevCount = Number(list.dataset.count || 0);
-      const isNewMsg = messages.length > prevCount;
+      const isNewMsg = timeline.length > prevCount;
       const wasNearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
       const prevScrollTop = list.scrollTop;
       list.dataset.sig = sig;
-      list.dataset.count = String(messages.length);
+      list.dataset.count = String(timeline.length);
 
       const frag = document.createDocumentFragment();
-      for (const m of messages) {
+      for (const entry of timeline) {
+        if (entry.kind === 'activity') {
+          const info = describeAction(entry.data);
+          const sys = document.createElement('div');
+          sys.className = 'chat-msg-system';
+          const clock = entry.ts
+            ? new Date(entry.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : '';
+          sys.textContent = `${info.icon} ${info.label}${clock ? ` · ${clock}` : ''}`;
+          frag.appendChild(sys);
+          continue;
+        }
+
+        const m = entry.data;
         if (m.role === 'system' || m.type === 'join') {
           const sys = document.createElement('div');
           sys.className = 'chat-msg-system';
@@ -1766,7 +1679,6 @@
       }
 
       renderChat();
-      renderHistory(now);
 
       if (!state || !state.active) {
         setMode('idle');
