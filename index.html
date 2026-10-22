@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0f19; }
+    iframe { border: none; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" allow="autoplay; fullscreen; clipboard-write"></iframe>
   <script>
     const TUNNEL_ORIGIN = "https://5z774h6f-8000.usw2.devtunnels.ms";
-    window.location.replace(TUNNEL_ORIGIN + window.location.pathname.replace(/^\/[^/]+/, "") + window.location.search);
+    document.getElementById("appFrame").src = TUNNEL_ORIGIN + window.location.search;
   </script>
-</head>
-<body>Redirecting to FridayMovieTime...</body>
+</body>
 </html>
