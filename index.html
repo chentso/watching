@@ -1,19 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0f19; }
-    iframe { border: none; width: 100%; height: 100%; display: block; }
-  </style>
+  <link rel="stylesheet" href="css/style.css?v=2.5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <iframe id="appFrame" allow="autoplay; fullscreen; clipboard-write"></iframe>
-  <script>
-    const TUNNEL_ORIGIN = "https://5z774h6f-8000.usw2.devtunnels.ms";
-    document.getElementById("appFrame").src = TUNNEL_ORIGIN + window.location.search;
-  </script>
+  <div class="app-layout">
+    <!-- Top Navigation Bar (Ultra-thin compact bar) -->
+    <header class="top-nav">
+      <div class="brand">
+        <span class="brand-icon">🍿</span>
+        <div class="brand-text">
+          <h1>FridayMovieTime</h1>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="pin-pill" id="pinDisplayPill" title="Room security PIN">
+          <span class="label">🔒 PIN:</span>
+          <span id="roomPinDisplay" class="pin-code">----</span>
+          <button id="btnCopyPin" class="btn-icon" title="Copy room PIN">📋</button>
+        </div>
+
+        <div id="connStatus" class="status-pill connected">
+          <span class="dot"></span>
+          <span class="status-text">Connected</span>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <!-- User Profile Pill -->
+        <div class="user-profile-pill">
+          <span id="userAvatarBadge" class="avatar-badge" title="Your avatar">👤</span>
+          <span id="userRoleBadge" class="role-badge">Viewer</span>
+          <button id="btnEditProfile" class="btn-icon" title="Change avatar or color">✏️</button>
+        </div>
+        <button id="btnOpenSettings" class="btn-secondary" title="Room sync settings">⚙️ Settings</button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="video-container-column">
+        <!-- Theater Container (Encapsulates player, toolbar, and minimap so all stay visible in fullscreen) -->
+        <div id="playerTheaterContainer" class="player-theater-container">
+          <!-- Video Player Wrapper -->
+          <div class="player-wrapper">
+            <video id="videoPlayer" playsinline preload="auto">
+              Your browser does not support the video tag.
+            </video>
+
+            <!-- Subtitle Text Overlay on Video -->
+            <div id="subtitleOverlay" class="subtitle-overlay hidden">
+              <span id="subtitleText" class="subtitle-text"></span>
+            </div>
+
+            <!-- Waiting for Slowest Overlay -->
+            <div id="waitingOverlay" class="waiting-overlay hidden">
+              <div class="waiting-card">
+                <div class="spinner"></div>
+                <h3>Paused: Waiting for slowest viewer</h3>
+                <p id="waitingDetailText">The video will automatically resume once they catch up to your position.</p>
+                <button id="btnCancelWaiting" class="btn-small-danger">Resume Now</button>
+              </div>
+            </div>
+
+            <!-- Video Loading Overlay -->
+            <div id="videoLoadingOverlay" class="loading-overlay hidden">
+              <div class="spinner"></div>
+              <p id="loadingStatusText">Loading video stream...</p>
+            </div>
+          </div>
+
+          <!-- Video Controls & Subtitles Toolbar -->
+          <div class="player-toolbar">
+            <div class="toolbar-left">
+              <button id="btnReloadVideo" class="btn-toolbar" title="Reload Video (preserves playback position)">
+                <span class="icon">🔄</span> Reload
+              </button>
+
+              <div class="toolbar-group">
+                <label for="selectPlaybackSpeed">Speed:</label>
+                <select id="selectPlaybackSpeed" class="select-toolbar" title="Playback Speed Override">
+                  <option value="auto">Auto</option>
+                  <option value="0.5">0.5x</option>
+                  <option value="0.75">0.75x</option>
+                  <option value="1.0">1.0x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.4">1.4x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0">2.0x</option>
+                </select>
+              </div>
+
+              <!-- Quality Selector -->
+              <div class="toolbar-group quality-group">
+                <label for="selectQuality">Quality:</label>
+                <select id="selectQuality" class="select-toolbar" title="Video Stream Quality">
+                  <option value="80">1080p</option>
+                  <option value="64" selected>720p</option>
+                  <option value="32">480p</option>
+                  <option value="16">360p</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="toolbar-right">
+              <!-- Subtitles Selector & Download -->
+              <div class="toolbar-group subtitle-group">
+                <label for="selectSubtitle">Subs:</label>
+                <select id="selectSubtitle" class="select-toolbar" title="Select Subtitle Track">
+                  <option value="off">Off (None)</option>
+                </select>
+
+                <label for="selectSubSize">Size:</label>
+                <select id="selectSubSize" class="select-toolbar" title="Subtitle Font Size">
+                  <option value="18px">18px</option>
+                  <option value="22px">22px</option>
+                  <option value="26px" selected>26px</option>
+                  <option value="32px">32px</option>
+                  <option value="38px">38px</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Undocked Clean Minimap (Directly under player & visible in Fullscreen) -->
+          <div id="videoMinimapCard" class="video-minimap-card">
+            <div id="minimapContainer" class="minimap-container">
+              <!-- Dynamic per-viewer progress bars rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Info Header -->
+        <div class="video-meta-bar">
+          <div class="meta-left">
+            <h2 class="video-title-header">
+              <a id="videoTitle" class="video-title-link" target="_blank" rel="noopener noreferrer">No video currently loaded</a>
+            </h2>
+            <div class="meta-sub">
+              <span id="videoUploader" class="meta-item">Uploader: -</span>
+            </div>
+          </div>
+          <div class="meta-right">
+            <!-- Sync Rendezvous Toggle Button -->
+            <button id="btnToggleWaitForSlowest" class="btn-wait-slowest" title="Pause until slowest user catches up so video automatically resumes">
+              <span class="wait-icon">⏳</span>
+              <div class="btn-text-col">
+                <span class="btn-title">Wait for Slowest</span>
+                <span id="waitToggleSub" class="btn-sub">Auto-resumes when caught up</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Selector & Host Controls -->
+        <div class="control-panel-card">
+          <div class="panel-header">
+            <h3>🎬 Video Source</h3>
+          </div>
+          <div class="video-input-group">
+            <input type="text" id="inputVideoQuery" placeholder="Paste Bilibili link or BV ID (e.g. BV1xx411c7mD, https://www.bilibili.com/video/BV1...)" />
+            <button id="btnLoadVideo" class="btn-primary">Load Video</button>
+          </div>
+          <div id="episodeGroup" class="episode-group hidden">
+            <label for="selectEpisode" class="episode-label">📑 Episode / Part:</label>
+            <select id="selectEpisode" class="select-episode" title="Select multi-part episode"></select>
+          </div>
+
+          <!-- Host Emergency Controls -->
+          <div id="hostControlsRow" class="host-actions-row">
+            <span class="host-tag">👑 Host Controls:</span>
+            <button id="btnHostPlayAll" class="btn-small">▶ Play All</button>
+            <button id="btnHostPauseAll" class="btn-small">⏸ Pause All</button>
+            <button id="btnHostSyncAll" class="btn-small">🎯 Sync All to My Time</button>
+            <div class="host-quality-box">
+              <span class="host-tag">📺 Quality:</span>
+              <select id="selectHostQuality" class="select-toolbar" title="Set Room Video Quality"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Live Activity Feed & Subs History -->
+      <aside class="sidebar-column">
+        <!-- Live Activity & Chat Card -->
+        <div class="sidebar-card chat-card">
+          <div class="sidebar-card-header">
+            <h3>💬 Room Events & Chat</h3>
+          </div>
+          <div id="chatMessages" class="chat-messages">
+            <!-- Dynamic chat & system messages -->
+          </div>
+
+          <!-- Quick Emoji Bar for typing into chat -->
+          <div id="chatEmojiBar" class="chat-emoji-bar">
+            <!-- Populated with quick clickable emojis -->
+          </div>
+
+          <form id="chatForm" class="chat-input-form">
+            <input type="text" id="chatInput" placeholder="Send a message to the room..." autocomplete="off" />
+            <button type="button" id="btnToggleChatEmoji" class="btn-emoji-trigger" title="Full emoji list">😊</button>
+            <button type="submit" class="btn-send">Send</button>
+          </form>
+        </div>
+
+        <!-- Subs History Viewer Card (Below Chat) -->
+        <div id="lyricsCard" class="sidebar-card lyrics-card">
+          <div class="sidebar-card-header lyrics-header">
+            <div class="lyrics-header-left">
+              <span class="lyrics-icon">📜</span>
+              <span class="lyrics-title">Subs History</span>
+            </div>
+            <div class="lyrics-header-right">
+              <button id="btnRecenterLyrics" class="btn-recenter" title="Re-center on current subtitle">
+                <span class="recenter-icon">🎯</span> Re-center
+              </button>
+            </div>
+          </div>
+          <div id="lyricsContainer" class="lyrics-container">
+            <div class="lyrics-empty">No subtitles active. Select a subtitle track from the Subs menu.</div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div id="profileModal" class="modal-backdrop hidden">
+    <div class="modal-card profile-card">
+      <div class="modal-header">
+        <h3>🎨 Choose Avatar & Color</h3>
+        <button id="btnCloseProfileModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-preview-box">
+          <div id="profilePreviewAvatar" class="profile-preview-avatar">👤</div>
+          <span class="profile-preview-hint">Your appearance in the room</span>
+        </div>
+
+        <label class="modal-section-label">Select Avatar Emoji:</label>
+        <div id="avatarPickerGrid" class="avatar-picker-grid">
+          <!-- Populated dynamically in app.js -->
+        </div>
+
+        <label class="modal-section-label">Select Color:</label>
+        <div id="colorPickerGrid" class="color-picker-grid">
+          <!-- Populated dynamically in app.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveProfile" class="btn-primary">Save Appearance</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Configurable Thresholds) -->
+  <div id="settingsModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ Room Synchronization Settings</h3>
+        <button id="btnCloseSettingsModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <label>Default Playback Speed:</label>
+          <select id="cfgDefaultSpeed">
+            <option value="1.0">1.0x</option>
+            <option value="1.25" selected>1.25x (Default)</option>
+            <option value="1.5">1.5x</option>
+          </select>
+          <span class="setting-help">The baseline speed for viewers when all are in sync.</span>
+        </div>
+
+        <div class="setting-item">
+          <label>Lag Threshold (seconds):</label>
+          <input type="number" id="cfgLagThreshold" value="2.0" min="0.5" max="30" step="0.5" />
+          <span class="setting-help">When a viewer lags behind by more than this time, ahead viewers are throttled to 1.0x.</span>
+        </div>
+
+        <div class="setting-item">
+          <label>Small Lag Catch-up Speed:</label>
+          <input type="number" id="cfgLagSpeed" value="1.25" min="1.0" max="3.0" step="0.05" />
+          <span class="setting-help">Playback speed for viewers lagging behind by more than the Lag Threshold (default 1.25x).</span>
+        </div>
+
+        <div class="setting-item">
+          <label>Heavy Lag Threshold (seconds):</label>
+          <input type="number" id="cfgHeavyLagThreshold" value="120.0" min="5" max="600" step="1" />
+          <span class="setting-help">If a viewer is further behind than this threshold, they boost to the Heavy Lag Catch-up Speed.</span>
+        </div>
+
+        <div class="setting-item">
+          <label>Heavy Lag Catch-up Speed:</label>
+          <input type="number" id="cfgHeavyLagSpeed" value="1.4" min="1.0" max="3.0" step="0.05" />
+          <span class="setting-help">Playback speed for viewers lagging behind by more than the Heavy Lag Threshold (default 1.4x).</span>
+        </div>
+
+        <div class="setting-item">
+          <label>Catchup Tolerance (seconds):</label>
+          <input type="number" id="cfgCatchupTolerance" value="1.0" min="0.2" max="5" step="0.1" />
+          <span class="setting-help">Difference tolerance to consider viewers synchronized and to trigger auto-resumes.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveSettings" class="btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Security PIN Modal -->
+  <div id="pinModal" class="modal-backdrop hidden">
+    <div class="modal-card pin-card">
+      <div class="modal-header">
+        <h3>🔒 Room PIN Required</h3>
+      </div>
+      <div class="modal-body">
+        <p class="pin-instruction">This watch party room is secured. Please enter the 4-digit PIN provided by the host to join.</p>
+        <div class="pin-input-wrapper">
+          <input type="text" id="inputJoinPin" class="pin-input-field" placeholder="Enter PIN (e.g. 1234)" maxlength="8" autocomplete="off" />
+          <button id="btnSubmitPin" class="btn-primary">Join Room</button>
+        </div>
+        <div id="pinErrorMsg" class="pin-error-text hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Emoji Context Menu Picker -->
+  <div id="emojiContextMenu" class="emoji-context-menu hidden">
+    <div class="emoji-menu-header">
+      <span id="emojiMenuTitle" class="emoji-menu-title">Select Emoji</span>
+      <button id="btnCloseEmojiMenu" class="btn-close-emoji" title="Close">&times;</button>
+    </div>
+    <div class="emoji-menu-search-row">
+      <span class="emoji-search-icon">🔍</span>
+      <input type="text" id="emojiSearchInput" placeholder="Search emojis (e.g. smile, fire, clap)..." autocomplete="off" />
+      <button id="btnClearEmojiSearch" class="btn-clear-search hidden">&times;</button>
+    </div>
+    <div id="emojiCategoryTabs" class="emoji-category-tabs">
+      <!-- Tabs generated dynamically -->
+    </div>
+    <div id="emojiPickerGrid" class="emoji-picker-grid">
+      <!-- Emojis generated dynamically -->
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/minimap.js?v=2.5"></script>
+  <script src="js/player.js?v=2.5"></script>
+  <script src="js/app.js?v=2.5"></script>
 </body>
 </html>
