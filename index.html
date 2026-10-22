@@ -37,7 +37,6 @@
         <!-- User Profile Pill -->
         <div class="user-profile-pill">
           <span id="userAvatarBadge" class="avatar-badge" title="Your avatar">👤</span>
-          <span id="userRoleBadge" class="role-badge">Viewer</span>
           <button id="btnEditProfile" class="btn-icon" title="Change avatar or color">✏️</button>
         </div>
         <button id="btnOpenSettings" class="btn-secondary" title="Room sync settings">⚙️ Settings</button>
@@ -174,9 +173,9 @@
             <select id="selectEpisode" class="select-episode" title="Select multi-part episode"></select>
           </div>
 
-          <!-- Host Emergency Controls -->
+          <!-- Room Sync Controls -->
           <div id="hostControlsRow" class="host-actions-row">
-            <span class="host-tag">👑 Host Controls:</span>
+            <span class="host-tag">🎛️ Room Controls:</span>
             <button id="btnHostPlayAll" class="btn-small">▶ Play All</button>
             <button id="btnHostPauseAll" class="btn-small">⏸ Pause All</button>
             <button id="btnHostSyncAll" class="btn-small">🎯 Sync All to My Time</button>
@@ -317,13 +316,13 @@
   </div>
 
   <!-- Room Security PIN Modal -->
-  <div id="pinModal" class="modal-backdrop hidden">
+  <div id="pinModal" class="modal-backdrop">
     <div class="modal-card pin-card">
       <div class="modal-header">
         <h3>🔒 Room PIN Required</h3>
       </div>
       <div class="modal-body">
-        <p class="pin-instruction">This watch party room is secured. Please enter the 4-digit PIN provided by the host to join.</p>
+        <p class="pin-instruction">Enter the 4-digit PIN generated when starting the server to join the watch party.</p>
         <div class="pin-input-wrapper">
           <input type="text" id="inputJoinPin" class="pin-input-field" placeholder="Enter PIN (e.g. 1234)" maxlength="8" autocomplete="off" />
           <button id="btnSubmitPin" class="btn-primary">Join Room</button>
@@ -353,8 +352,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/minimap.js?v=2.5"></script>
-  <script src="js/player.js?v=2.5"></script>
-  <script src="js/app.js?v=2.5"></script>
+  <script src="js/minimap.js?v=2.6"></script>
+  <script src="js/player.js?v=2.6"></script>
+  <script src="js/app.js?v=2.6"></script>
 </body>
 </html>
