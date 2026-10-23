@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <link rel="stylesheet" href="css/style.css?v=2.10">
+  <link rel="stylesheet" href="css/style.css?v=2.11">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -351,9 +351,46 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="js/minimap.js?v=2.10"></script>
-  <script src="js/player.js?v=2.10"></script>
-  <script src="js/app.js?v=2.10"></script>
+  <!-- Scripts (auto-loads latest CSS/JS from live backend tunnel when hosted on GitHub Pages) -->
+  <script>
+    (async function() {
+      const isGhPages = window.location.hostname.endsWith("github.io");
+      const params = new URLSearchParams(window.location.search);
+      const tunnelOrigin = (params.get("backend") || "https://5z774h6f-8000.usw2.devtunnels.ms").replace(/\/+$/, "");
+
+      if (isGhPages) {
+        try {
+          const headers = { "X-Tunnel-Skip-AntiPhishing-Page": "true" };
+          const bust = Date.now();
+          const cssResp = await fetch(`${tunnelOrigin}/css/style.css?_=${bust}`, { headers, cache: "no-store" });
+          if (cssResp.ok) {
+            const styleEl = document.createElement("style");
+            styleEl.textContent = await cssResp.text();
+            document.head.appendChild(styleEl);
+          }
+          for (const src of ["js/minimap.js", "js/player.js", "js/app.js"]) {
+            const jsResp = await fetch(`${tunnelOrigin}/${src}?_=${bust}`, { headers, cache: "no-store" });
+            if (!jsResp.ok) throw new Error(`Failed to fetch ${src}`);
+            const s = document.createElement("script");
+            s.textContent = await jsResp.text();
+            document.body.appendChild(s);
+          }
+          return;
+        } catch (err) {
+          console.warn("Live backend asset sync fallback to static files:", err);
+        }
+      }
+
+      for (const src of ["js/minimap.js?v=2.11", "js/player.js?v=2.11", "js/app.js?v=2.11"]) {
+        await new Promise((resolve) => {
+          const s = document.createElement("script");
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = resolve;
+          document.body.appendChild(s);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
