@@ -35,10 +35,6 @@
                 <button type="button" id="btnAddSharedBookmark" class="btn-toolbar btn-bookmark-shared" title="Create a shared bookmark at current time for everyone in the room">
                   Bookmark (Shared)
                 </button>
-                <button type="button" id="btnOpenWatchlist" class="btn-toolbar btn-watchlist-toolbar" title="Open Room Movie Watch List Checklist">
-                  <span>📋</span> <span>Watch List</span>
-                  <span id="watchlistCountBadge" class="watchlist-count-badge hidden">0</span>
-                </button>
               </div>
             </div>
 
@@ -546,49 +542,67 @@
     <div class="modal-card watchlist-card">
       <div class="modal-header">
         <div class="watchlist-header-left">
-          <h3>🎬 Movie Watch List</h3>
+          <h3>Movie Watch List</h3>
           <span id="watchlistStats" class="watchlist-stats">0 planned &bull; 0 watched</span>
         </div>
         <button id="btnCloseWatchlistModal" class="btn-close" title="Close Watch List">&times;</button>
       </div>
 
-      <div class="modal-body watchlist-body">
-        <!-- Add Movie Input Section -->
-        <div class="watchlist-add-section">
-          <form id="watchlistAddForm" class="watchlist-form">
-            <div class="watchlist-input-row">
-              <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="Add a movie to watch (plain text)..." autocomplete="off" required />
-              <button type="submit" id="btnWatchlistAdd" class="btn-primary">Add Movie</button>
+      <div class="watchlist-modal-split-content">
+        <!-- Left: Watch List Checklist -->
+        <div class="modal-body watchlist-body">
+          <!-- Add Movie Input Section -->
+          <div class="watchlist-add-section">
+            <form id="watchlistAddForm" class="watchlist-form">
+              <div class="watchlist-input-row">
+                <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="Add a movie to watch (plain text)..." autocomplete="off" required />
+                <button type="submit" id="btnWatchlistAdd" class="btn-primary">Add Movie</button>
+              </div>
+              <div class="watchlist-input-subrow">
+                <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="Tags (e.g. sci-fi, comedy, 90s - separated by comma or space)" autocomplete="off" />
+                <input type="text" id="watchlistInputNotes" class="watchlist-input-notes" placeholder="Optional notes / recommendation..." autocomplete="off" />
+              </div>
+            </form>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="watchlist-filter-bar">
+            <div class="watchlist-tabs">
+              <button type="button" id="tabWatchlistPlanned" class="watchlist-tab active" data-tab="planned">Planned (<span id="countPlanned">0</span>)</button>
+              <button type="button" id="tabWatchlistWatched" class="watchlist-tab" data-tab="watched">Watched (<span id="countWatched">0</span>)</button>
+              <button type="button" id="tabWatchlistAll" class="watchlist-tab" data-tab="all">All (<span id="countAll">0</span>)</button>
             </div>
-            <div class="watchlist-input-subrow">
-              <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="Tags (e.g. sci-fi, comedy, 90s - separated by comma or space)" autocomplete="off" />
-              <input type="text" id="watchlistInputNotes" class="watchlist-input-notes" placeholder="Optional notes / recommendation..." autocomplete="off" />
+            <div class="watchlist-search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="watchlistSearchInput" placeholder="Filter movies or tags..." autocomplete="off" />
+              <button type="button" id="btnClearWatchlistSearch" class="btn-clear-watchlist-search hidden">&times;</button>
             </div>
+          </div>
+
+          <!-- Tag Filter Chips Bar -->
+          <div id="watchlistTagChips" class="watchlist-tag-chips hidden">
+            <!-- Populated dynamically with clickable tag filters -->
+          </div>
+
+          <!-- Movie List Checklist Container -->
+          <div id="watchlistItemsList" class="watchlist-items-list" tabindex="0">
+            <!-- Movie items rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Right: Duplicate Live Chat Box inside Watch List -->
+        <div class="watchlist-chat-pane">
+          <div class="watchlist-chat-header">
+            <h4>💬 Discussion</h4>
+            <span class="watchlist-chat-hint">Live room chat</span>
+          </div>
+          <div id="watchlistChatMessages" class="watchlist-chat-messages">
+            <!-- Synchronized messages duplicated dynamically -->
+          </div>
+          <form id="watchlistChatForm" class="watchlist-chat-input-form">
+            <input type="text" id="watchlistChatInput" placeholder="Discuss movies..." autocomplete="off" />
+            <button type="submit" class="btn-send">Send</button>
           </form>
-        </div>
-
-        <!-- Filter & Search Toolbar -->
-        <div class="watchlist-filter-bar">
-          <div class="watchlist-tabs">
-            <button type="button" id="tabWatchlistPlanned" class="watchlist-tab active" data-tab="planned">Planned (<span id="countPlanned">0</span>)</button>
-            <button type="button" id="tabWatchlistWatched" class="watchlist-tab" data-tab="watched">Watched (<span id="countWatched">0</span>)</button>
-            <button type="button" id="tabWatchlistAll" class="watchlist-tab" data-tab="all">All (<span id="countAll">0</span>)</button>
-          </div>
-          <div class="watchlist-search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="watchlistSearchInput" placeholder="Filter movies or tags..." autocomplete="off" />
-            <button type="button" id="btnClearWatchlistSearch" class="btn-clear-watchlist-search hidden">&times;</button>
-          </div>
-        </div>
-
-        <!-- Tag Filter Chips Bar -->
-        <div id="watchlistTagChips" class="watchlist-tag-chips hidden">
-          <!-- Populated dynamically with clickable tag filters -->
-        </div>
-
-        <!-- Movie List Checklist Container -->
-        <div id="watchlistItemsList" class="watchlist-items-list" tabindex="0">
-          <!-- Movie items rendered dynamically -->
         </div>
       </div>
 
