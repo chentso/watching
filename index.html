@@ -545,26 +545,17 @@
           <h3>Movie Watch List</h3>
           <span id="watchlistStats" class="watchlist-stats">0 planned &bull; 0 watched</span>
         </div>
-        <button id="btnCloseWatchlistModal" class="btn-close" title="Close Watch List">&times;</button>
+        <div class="watchlist-header-right">
+          <button type="button" id="btnOpenAddMovieModal" class="btn-primary btn-add-movie-header">
+            <span>➕</span> <span>Add Movie</span>
+          </button>
+          <button id="btnCloseWatchlistModal" class="btn-close" title="Close Watch List">&times;</button>
+        </div>
       </div>
 
       <div class="watchlist-modal-split-content">
         <!-- Left: Watch List Checklist -->
         <div class="modal-body watchlist-body">
-          <!-- Add Movie Input Section -->
-          <div class="watchlist-add-section">
-            <form id="watchlistAddForm" class="watchlist-form">
-              <div class="watchlist-input-row">
-                <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="Add a movie to watch (plain text)..." autocomplete="off" required />
-                <button type="submit" id="btnWatchlistAdd" class="btn-primary">Add Movie</button>
-              </div>
-              <div class="watchlist-input-subrow">
-                <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="Tags (e.g. sci-fi, comedy, 90s - separated by comma or space)" autocomplete="off" />
-                <input type="text" id="watchlistInputNotes" class="watchlist-input-notes" placeholder="Optional notes / recommendation..." autocomplete="off" />
-              </div>
-            </form>
-          </div>
-
           <!-- Filter & Search Toolbar -->
           <div class="watchlist-filter-bar">
             <div class="watchlist-tabs">
@@ -613,6 +604,37 @@
       <div class="modal-footer watchlist-footer">
         <span class="watchlist-footer-hint">💡 Click checkbox to toggle watched. Click ✏️ to edit title, tags, or notes.</span>
         <button type="button" id="btnCloseWatchlistFooter" class="btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Movie Popup Dialog -->
+  <div id="addMovieModal" class="modal-backdrop hidden" style="z-index: 210;">
+    <div class="modal-card watchlist-add-card">
+      <div class="modal-header">
+        <h3>➕ Add Movie to Watch List</h3>
+        <button id="btnCloseAddMovieModal" class="btn-close" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="watchlistAddForm" class="watchlist-form">
+          <div class="setting-item">
+            <label for="watchlistInputTitle">Movie Title (Plain Text):</label>
+            <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="e.g. Inception, Spirited Away..." autocomplete="off" required />
+          </div>
+          <div class="setting-item">
+            <label for="watchlistInputTags">Tags (comma or space separated):</label>
+            <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="e.g. sci-fi, comedy, 90s" autocomplete="off" />
+            <span class="setting-help">Organize movies by genre or topic.</span>
+          </div>
+          <div class="setting-item">
+            <label for="watchlistInputNotes">Notes / Recommendation (Optional):</label>
+            <input type="text" id="watchlistInputNotes" class="watchlist-input-notes" placeholder="e.g. Recommended by friend" autocomplete="off" />
+          </div>
+          <div class="watchlist-edit-actions">
+            <button type="button" id="btnCancelAddMovie" class="btn-secondary">Cancel</button>
+            <button type="submit" id="btnWatchlistAdd" class="btn-primary">Add Movie</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
