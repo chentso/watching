@@ -4,59 +4,249 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <link rel="stylesheet" href="css/style.css?v=2.11">
+  <link rel="stylesheet" href="css/style.css?v=2.50">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+    window.addEventListener('DOMContentLoaded', () => window.scrollTo(0, 0));
+    window.addEventListener('load', () => window.scrollTo(0, 0));
+  </script>
 </head>
 <body>
   <div class="app-layout">
-    <!-- Top Navigation Bar (Ultra-thin compact bar) -->
-    <header class="top-nav">
-      <div class="brand">
-        <span class="brand-icon">🍿</span>
-        <div class="brand-text">
-          <h1>FridayMovieTime</h1>
-        </div>
-      </div>
-
-      <div class="nav-center">
-        <div class="pin-pill" id="pinDisplayPill" title="Room security PIN">
-          <span class="label">🔒 PIN:</span>
-          <span id="roomPinDisplay" class="pin-code">----</span>
-          <button id="btnCopyPin" class="btn-icon" title="Copy room PIN">📋</button>
-        </div>
-
-        <div id="connStatus" class="status-pill connected">
-          <span class="dot"></span>
-          <span class="status-text">Connected</span>
-        </div>
-      </div>
-
-      <div class="nav-right">
-        <!-- User Profile Pill -->
-        <div class="user-profile-pill">
-          <span id="userAvatarBadge" class="avatar-badge" title="Your avatar">👤</span>
-          <button id="btnEditProfile" class="btn-icon" title="Change avatar or color">✏️</button>
-        </div>
-        <button id="btnOpenSettings" class="btn-secondary" title="Room sync settings">⚙️ Settings</button>
-      </div>
-    </header>
-
     <!-- Main Content Area -->
     <main class="main-content">
       <div class="video-container-column">
         <!-- Theater Container (Encapsulates player, toolbar, and minimap so all stay visible in fullscreen) -->
         <div id="playerTheaterContainer" class="player-theater-container">
+          <!-- Video Controls & Subtitles Toolbar -->
+          <div class="player-toolbar">
+            <div class="toolbar-left">
+              <!-- Bookmark Creation Buttons -->
+              <div class="toolbar-group bookmark-group">
+                <button type="button" id="btnAddPersonalBookmark" class="btn-toolbar btn-bookmark-personal" title="Save a personal bookmark at current time (only visible to you)">
+                  Bookmark (Me)
+                </button>
+                <button type="button" id="btnAddSharedBookmark" class="btn-toolbar btn-bookmark-shared" title="Create a shared bookmark at current time for everyone in the room">
+                  Bookmark (Shared)
+                </button>
+                <button type="button" id="btnOpenWatchlist" class="btn-toolbar btn-watchlist-toolbar" title="Open Room Movie Watch List Checklist">
+                  <span>📋</span> <span>Watch List</span>
+                  <span id="watchlistCountBadge" class="watchlist-count-badge hidden">0</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="toolbar-right">
+              <!-- Connection Status Dot -->
+              <span id="connStatus" class="connection-status-dot connected" title="Connected"></span>
+
+              <!-- User Profile Config Button -->
+              <button type="button" id="btnEditProfile" class="btn-toolbar btn-user-profile-toolbar" title="Customize Appearance (Avatar & Color)">
+                <span id="userAvatarBadge" class="avatar-badge">👤</span>
+              </button>
+
+              <!-- Video Source Context Menu Button -->
+              <div class="toolbar-menu-wrapper">
+                <button type="button" id="btnToolbarVideoSource" class="btn-toolbar btn-settings-menu btn-source-menu" title="Change Video Source / Load Bilibili Video">
+                  <span class="source-icon">🎬</span>
+                  <span>Video Source</span>
+                </button>
+
+                <!-- Video Source Dropdown Menu -->
+                <div id="toolbarVideoSourceMenu" class="toolbar-settings-menu video-source-menu hidden">
+                  <div class="settings-menu-header">
+                    <span class="settings-menu-title">Video Source</span>
+                    <button type="button" id="btnCloseVideoSource" class="btn-close-settings" title="Close">&times;</button>
+                  </div>
+
+                  <div class="settings-menu-body">
+                    <div class="source-input-row">
+                      <input type="text" id="inputVideoQuery" placeholder="Paste Bilibili link or BV ID (e.g. BV1xx...)" autocomplete="off" />
+                      <button type="button" id="btnLoadVideo" class="btn-primary">Load</button>
+                    </div>
+
+                    <div id="episodeGroup" class="episode-group hidden">
+                      <label for="selectEpisode" class="episode-label">📑 Episode / Part:</label>
+                      <select id="selectEpisode" class="select-episode" title="Select multi-part episode"></select>
+                    </div>
+
+                    <div class="settings-menu-divider"></div>
+
+                    <!-- Room Sync Controls -->
+                    <div id="hostControlsRow" class="source-menu-room-controls">
+                      <span class="source-section-tag">🎛️ Room Controls</span>
+                      <div class="source-room-btns">
+                        <button type="button" id="btnHostPlayAll" class="btn-small">▶ Play All</button>
+                        <button type="button" id="btnHostPauseAll" class="btn-small">⏸ Pause All</button>
+                        <button type="button" id="btnHostSyncAll" class="btn-small">🎯 Sync All</button>
+                      </div>
+                      <div class="source-host-quality">
+                        <span class="source-sub-tag">📺 Room Quality:</span>
+                        <select id="selectHostQuality" class="select-toolbar select-settings" title="Set Room Video Quality"></select>
+                      </div>
+                    </div>
+
+                    <div class="settings-menu-divider"></div>
+
+                    <!-- Room Synchronization Settings Selection -->
+                    <div class="source-menu-action-row">
+                      <button type="button" id="btnOpenSettings" class="btn-source-sync-settings" title="Room Synchronization Settings">
+                        <span>⚙️</span> <span>Room Sync Settings</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Unified Settings / More Dropdown Menu -->
+              <div class="toolbar-menu-wrapper">
+                <button type="button" id="btnToolbarSettings" class="btn-toolbar btn-settings-menu" title="Player Settings & Options">
+                  <span class="settings-icon">⚙️</span>
+                  <span>More</span>
+                </button>
+
+                <!-- Unified Settings / More Dropdown Menu -->
+                <div id="toolbarSettingsMenu" class="toolbar-settings-menu hidden">
+                  <div class="settings-menu-header">
+                    <span class="settings-menu-title">Settings</span>
+                    <button type="button" id="btnCloseToolbarSettings" class="btn-close-settings" title="Close Settings">&times;</button>
+                  </div>
+
+                  <div class="settings-menu-body">
+                    <!-- Room PIN Row -->
+                    <div class="settings-menu-row settings-pin-row">
+                      <span class="settings-row-label">Room PIN</span>
+                      <div class="settings-pin-box">
+                        <span id="roomPinDisplay" class="pin-code">----</span>
+                        <button type="button" id="btnCopyPin" class="btn-toolbar btn-copy-pin" title="Copy room PIN">📋</button>
+                      </div>
+                    </div>
+
+                    <div class="settings-menu-divider"></div>
+
+                    <!-- Playback Speed -->
+                    <div class="settings-menu-row">
+                      <label for="selectPlaybackSpeed" class="settings-row-label">Speed</label>
+                      <select id="selectPlaybackSpeed" class="select-toolbar select-settings" title="Playback Speed Override">
+                        <option value="auto">Auto</option>
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1.0">1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.4">1.4x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2.0">2.0x</option>
+                      </select>
+                    </div>
+
+                    <!-- Quality Selector -->
+                    <div class="settings-menu-row">
+                      <label for="selectQuality" class="settings-row-label">Quality</label>
+                      <select id="selectQuality" class="select-toolbar select-settings" title="Video Stream Quality">
+                        <option value="80">1080p</option>
+                        <option value="64" selected>720p</option>
+                        <option value="32">480p</option>
+                        <option value="16">360p</option>
+                      </select>
+                    </div>
+
+                    <div class="settings-menu-divider"></div>
+
+                    <!-- Top Subtitles Selector -->
+                    <div class="settings-menu-row">
+                      <label for="selectSubtitle" class="settings-row-label">Top Sub</label>
+                      <select id="selectSubtitle" class="select-toolbar select-settings" title="Select Top Subtitle Track (e.g. Chinese)">
+                        <option value="off">Top Sub: Off</option>
+                      </select>
+                    </div>
+
+                    <!-- Bottom Subtitles Selector -->
+                    <div class="settings-menu-row">
+                      <label for="selectSecondarySubtitle" class="settings-row-label">Bottom Sub</label>
+                      <select id="selectSecondarySubtitle" class="select-toolbar select-settings" title="Select Bottom Subtitle Track (e.g. English)">
+                        <option value="off">Bottom Sub: Off</option>
+                      </select>
+                    </div>
+
+                    <!-- Subtitle Size -->
+                    <div class="settings-menu-row">
+                      <label for="selectSubSize" class="settings-row-label">Sub Size</label>
+                      <select id="selectSubSize" class="select-toolbar select-settings" title="Subtitle Font Size">
+                        <option value="18px">18px</option>
+                        <option value="22px">22px</option>
+                        <option value="26px" selected>26px</option>
+                        <option value="32px">32px</option>
+                        <option value="38px">38px</option>
+                      </select>
+                    </div>
+
+                    <!-- More Subtitle Settings Button Row -->
+                    <div class="settings-menu-row">
+                      <button type="button" id="btnOpenMoreSubSettings" class="btn-settings-more-subs" title="More Subtitle Settings (Sub Delay & Custom SRT)">
+                        <span>⚙️</span> <span>More Subtitle Settings</span>
+                      </button>
+                    </div>
+
+                    <div class="settings-menu-divider"></div>
+
+                    <!-- Bilibili Danmaku Settings Row -->
+                    <div class="settings-menu-row">
+                      <span class="settings-row-label">Bilibili Subs</span>
+                      <div class="settings-danmaku-btns">
+                        <button type="button" id="btnToggleDanmaku" class="btn-toolbar btn-danmaku-toggle active" title="Toggle Bilibili scrolling comments overlay">
+                          <span>弹</span>
+                          <span id="danmakuStateLabel" class="danmaku-state-label">On</span>
+                        </button>
+                        <button type="button" id="btnToggleDanmakuTrad" class="btn-toolbar btn-danmaku-trad" title="Toggle Danmaku Traditional Chinese (繁體中文)">
+                          <span>繁</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Live Room Danmaku Settings Row -->
+                    <div class="settings-menu-row">
+                      <span class="settings-row-label">Room Danmaku</span>
+                      <div class="settings-danmaku-btns">
+                        <button type="button" id="btnToggleRoomDanmaku" class="btn-toolbar btn-danmaku-toggle active" title="Toggle live room chat floating across video">
+                          <span>💬</span>
+                          <span id="roomDanmakuStateLabel" class="danmaku-state-label">On</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Reload Video -->
+                    <div class="settings-menu-action-row">
+                      <button type="button" id="btnReloadVideo" class="btn-settings-reload" title="Reload Video Stream (preserves playback position)">
+                        <span>🔄</span> <span>Reload Stream</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Video Player Wrapper -->
           <div class="player-wrapper">
             <video id="videoPlayer" playsinline preload="auto">
               Your browser does not support the video tag.
             </video>
 
+            <!-- Bilibili Danmaku Scrolling Comments Overlay (Beta) -->
+            <div id="danmakuOverlay" class="danmaku-overlay"></div>
+
             <!-- Subtitle Text Overlay on Video -->
             <div id="subtitleOverlay" class="subtitle-overlay hidden">
-              <span id="subtitleText" class="subtitle-text"></span>
+              <div id="subtitleText" class="subtitle-text">
+                <div id="subtitleTop" class="subtitle-line subtitle-top"></div>
+                <div id="subtitleBottom" class="subtitle-line subtitle-bottom"></div>
+              </div>
             </div>
 
             <!-- Waiting for Slowest Overlay -->
@@ -74,58 +264,13 @@
               <div class="spinner"></div>
               <p id="loadingStatusText">Loading video stream...</p>
             </div>
-          </div>
 
-          <!-- Video Controls & Subtitles Toolbar -->
-          <div class="player-toolbar">
-            <div class="toolbar-left">
-              <button id="btnReloadVideo" class="btn-toolbar" title="Reload Video (preserves playback position)">
-                <span class="icon">🔄</span> Reload
-              </button>
+            <!-- Floating Reaction Bursts Container -->
+            <div id="reactionBurstContainer" class="reaction-burst-container"></div>
 
-              <div class="toolbar-group">
-                <label for="selectPlaybackSpeed">Speed:</label>
-                <select id="selectPlaybackSpeed" class="select-toolbar" title="Playback Speed Override">
-                  <option value="auto">Auto</option>
-                  <option value="0.5">0.5x</option>
-                  <option value="0.75">0.75x</option>
-                  <option value="1.0">1.0x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.4">1.4x</option>
-                  <option value="1.5">1.5x</option>
-                  <option value="2.0">2.0x</option>
-                </select>
-              </div>
-
-              <!-- Quality Selector -->
-              <div class="toolbar-group quality-group">
-                <label for="selectQuality">Quality:</label>
-                <select id="selectQuality" class="select-toolbar" title="Video Stream Quality">
-                  <option value="80">1080p</option>
-                  <option value="64" selected>720p</option>
-                  <option value="32">480p</option>
-                  <option value="16">360p</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="toolbar-right">
-              <!-- Subtitles Selector & Download -->
-              <div class="toolbar-group subtitle-group">
-                <label for="selectSubtitle">Subs:</label>
-                <select id="selectSubtitle" class="select-toolbar" title="Select Subtitle Track">
-                  <option value="off">Off (None)</option>
-                </select>
-
-                <label for="selectSubSize">Size:</label>
-                <select id="selectSubSize" class="select-toolbar" title="Subtitle Font Size">
-                  <option value="18px">18px</option>
-                  <option value="22px">22px</option>
-                  <option value="26px" selected>26px</option>
-                  <option value="32px">32px</option>
-                  <option value="38px">38px</option>
-                </select>
-              </div>
+            <!-- Subtitle Delay Toast HUD Indicator -->
+            <div id="subDelayHud" class="sub-delay-hud hidden">
+              <span id="subDelayHudText">⏱️ Sub Delay: 0.0s</span>
             </div>
           </div>
 
@@ -133,6 +278,9 @@
           <div id="videoMinimapCard" class="video-minimap-card">
             <div id="minimapContainer" class="minimap-container">
               <!-- Dynamic per-viewer progress bars rendered here -->
+            </div>
+            <div id="bookmarksBar" class="bookmarks-bar hidden">
+              <!-- Dynamic personal & shared bookmark chips rendered here -->
             </div>
           </div>
         </div>
@@ -145,6 +293,8 @@
             </h2>
             <div class="meta-sub">
               <span id="videoUploader" class="meta-item">Uploader: -</span>
+              <span id="videoDuration" class="meta-item">Duration: -</span>
+              <span id="videoEta" class="meta-item meta-eta hidden" title="Estimated time to finish at current speed">🏁 Finishes ~--:--</span>
             </div>
           </div>
           <div class="meta-right">
@@ -158,44 +308,28 @@
             </button>
           </div>
         </div>
-
-        <!-- Video Selector & Host Controls -->
-        <div class="control-panel-card">
-          <div class="panel-header">
-            <h3>🎬 Video Source</h3>
-          </div>
-          <div class="video-input-group">
-            <input type="text" id="inputVideoQuery" placeholder="Paste Bilibili link or BV ID (e.g. BV1xx411c7mD, https://www.bilibili.com/video/BV1...)" />
-            <button id="btnLoadVideo" class="btn-primary">Load Video</button>
-          </div>
-          <div id="episodeGroup" class="episode-group hidden">
-            <label for="selectEpisode" class="episode-label">📑 Episode / Part:</label>
-            <select id="selectEpisode" class="select-episode" title="Select multi-part episode"></select>
-          </div>
-
-          <!-- Room Sync Controls -->
-          <div id="hostControlsRow" class="host-actions-row">
-            <span class="host-tag">🎛️ Room Controls:</span>
-            <button id="btnHostPlayAll" class="btn-small">▶ Play All</button>
-            <button id="btnHostPauseAll" class="btn-small">⏸ Pause All</button>
-            <button id="btnHostSyncAll" class="btn-small">🎯 Sync All to My Time</button>
-            <div class="host-quality-box">
-              <span class="host-tag">📺 Quality:</span>
-              <select id="selectHostQuality" class="select-toolbar" title="Set Room Video Quality"></select>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Right Sidebar: Live Activity Feed & Subs History -->
       <aside class="sidebar-column">
         <!-- Live Activity & Chat Card -->
         <div class="sidebar-card chat-card">
-          <div class="sidebar-card-header">
-            <h3>💬 Room Events & Chat</h3>
+          <div class="sidebar-card-header chat-header-with-actions">
+            <h3>Chat</h3>
+            <button type="button" id="btnOpenWatchlistSidebar" class="btn-sidebar-action" title="Open Room Movie Watch List">
+              <span>📋</span> <span>Watch List</span>
+              <span id="watchlistSidebarCountBadge" class="watchlist-count-badge hidden">0</span>
+            </button>
           </div>
           <div id="chatMessages" class="chat-messages">
             <!-- Dynamic chat & system messages -->
+          </div>
+
+          <!-- Live "is typing..." Indicator -->
+          <div id="chatTypingIndicator" class="chat-typing-indicator hidden" aria-live="polite">
+            <span class="typing-avatar"></span>
+            <span class="typing-text"></span>
+            <span class="typing-dots"><span></span><span></span><span></span></span>
           </div>
 
           <!-- Quick Emoji Bar for typing into chat -->
@@ -203,9 +337,20 @@
             <!-- Populated with quick clickable emojis -->
           </div>
 
+          <!-- Image Attachment Preview Box (when screenshot is pasted) -->
+          <div id="chatImageAttachmentPreview" class="chat-image-preview hidden">
+            <div class="chat-image-preview-content">
+              <img id="chatPreviewImg" class="chat-preview-thumbnail" src="" alt="Pasted screenshot" />
+              <div class="chat-preview-meta">
+                <span class="chat-preview-title">Screenshot attached</span>
+                <span class="chat-preview-hint">Press Enter or Send to post (add optional caption)</span>
+              </div>
+              <button type="button" id="btnRemoveChatImage" class="btn-remove-attachment" title="Remove attached screenshot">&times;</button>
+            </div>
+          </div>
+
           <form id="chatForm" class="chat-input-form">
-            <input type="text" id="chatInput" placeholder="Send a message to the room..." autocomplete="off" />
-            <button type="button" id="btnToggleChatEmoji" class="btn-emoji-trigger" title="Full emoji list">😊</button>
+            <input type="text" id="chatInput" placeholder="Send a message (or paste screenshot)..." autocomplete="off" />
             <button type="submit" class="btn-send">Send</button>
           </form>
         </div>
@@ -214,12 +359,17 @@
         <div id="lyricsCard" class="sidebar-card lyrics-card">
           <div class="sidebar-card-header lyrics-header">
             <div class="lyrics-header-left">
-              <span class="lyrics-icon">📜</span>
-              <span class="lyrics-title">Subs History</span>
+              <span class="lyrics-title">Subtitles</span>
             </div>
             <div class="lyrics-header-right">
-              <button id="btnRecenterLyrics" class="btn-recenter" title="Re-center on current subtitle">
-                <span class="recenter-icon">🎯</span> Re-center
+              <button type="button" id="btnUploadSrtViewer" class="btn-sub-viewer-upload" title="Upload custom .srt subtitle file">
+                <span>📁</span> <span>SRT</span>
+              </button>
+              <button type="button" id="btnDeleteCustomSrtViewer" class="btn-sub-viewer-upload btn-sub-viewer-delete hidden" title="Delete uploaded custom subtitle">
+                <span>🗑️</span>
+              </button>
+              <button id="btnRecenterLyrics" class="btn-recenter" title="Follow Line">
+                <span class="recenter-icon">🎯</span> <span id="followLineText">Follow Line</span>
               </button>
             </div>
           </div>
@@ -315,6 +465,173 @@
     </div>
   </div>
 
+  <!-- More Subtitle Settings Modal (Sub Delay & Custom SRT) -->
+  <div id="moreSubSettingsModal" class="modal-backdrop hidden">
+    <div class="modal-card sub-settings-card">
+      <div class="modal-header">
+        <h3>⚙️ More Subtitle Settings</h3>
+        <button id="btnCloseMoreSubModal" class="btn-close" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Subtitle Delay Nudger -->
+        <div class="sub-settings-section">
+          <div class="sub-settings-section-header">
+            <label class="modal-section-label">Subtitle Delay / Offset</label>
+            <div class="sub-offset-header-right">
+              <span id="subOffsetDisplay" class="sub-offset-pill" title="Current subtitle delay (keyboard keys: [ and ])">0.0s</span>
+              <button type="button" id="btnSubOffsetReset" class="btn-toolbar sub-offset-btn reset" title="Reset delay to 0.0s (keyboard key: \)">↺</button>
+            </div>
+          </div>
+          <div class="sub-offset-btn-bar">
+            <button type="button" id="btnSubOffsetMinus05" class="btn-toolbar sub-offset-btn" title="Subtitles earlier by -0.5s">-0.5s</button>
+            <button type="button" id="btnSubOffsetMinus01" class="btn-toolbar sub-offset-btn" title="Subtitles earlier by -0.1s (Key: [)">-0.1s</button>
+            <button type="button" id="btnSubOffsetPlus01" class="btn-toolbar sub-offset-btn" title="Subtitles later by +0.1s (Key: ])">+0.1s</button>
+            <button type="button" id="btnSubOffsetPlus05" class="btn-toolbar sub-offset-btn" title="Subtitles later by +0.5s">+0.5s</button>
+          </div>
+          <span class="sub-settings-hint">Shortcuts: <code>[</code> and <code>]</code> adjust delay &plusmn;0.1s, <code>\</code> resets to 0.0s.</span>
+        </div>
+
+        <!-- Custom SRT Subtitle Upload -->
+        <div class="sub-settings-section">
+          <label class="modal-section-label">Custom SRT File</label>
+          <div class="settings-srt-controls">
+            <input type="file" id="inputCustomSrt" accept=".srt,text/plain" class="hidden" style="display: none !important;" />
+            <button type="button" id="btnUploadSrt" class="btn-toolbar btn-settings-upload-srt" title="Upload custom .srt subtitle file">
+              <span>📁</span> <span id="labelUploadSrt">Upload .srt</span>
+            </button>
+            <button type="button" id="btnRenameCustomSrt" class="btn-toolbar btn-settings-rename-srt hidden" title="Rename custom subtitle display name">
+              <span>✏️</span>
+            </button>
+            <button type="button" id="btnDeleteCustomSrt" class="btn-toolbar btn-settings-delete-srt hidden" title="Delete custom uploaded subtitle">
+              <span>🗑️</span>
+            </button>
+          </div>
+
+          <!-- Room Share Subtitle Row -->
+          <div id="customSrtShareRow" class="sub-settings-row hidden" style="margin-top: 8px;">
+            <span class="sub-settings-label">Room Share</span>
+            <button type="button" id="btnShareCustomSrt" class="btn-toolbar btn-settings-share-srt" title="Share custom subtitles with everyone in the room">
+              <span id="iconShareSrt">📢</span> <span id="labelShareSrt">Share with Room</span>
+            </button>
+          </div>
+
+          <!-- Custom SRT Sync Mode Option -->
+          <div id="customSrtOptionsRow" class="sub-settings-row hidden" style="margin-top: 8px;">
+            <label for="selectSrtSyncMode" class="sub-settings-label">SRT Timing</label>
+            <select id="selectSrtSyncMode" class="select-toolbar select-settings" title="Select timing mode for custom SRT">
+              <option value="as-is">As-Is (SRT Timestamps)</option>
+              <option value="bilibili-sync">Auto-Sync (Bilibili 1st &amp; Last Line)</option>
+            </select>
+          </div>
+
+          <div id="customSrtInfoRow" class="sub-settings-row settings-srt-info hidden" style="margin-top: 6px;">
+            <span id="customSrtInfoText" class="settings-srt-info-text"></span>
+          </div>
+
+          <!-- Uploaded / Shared Subtitles List -->
+          <div id="sharedSubtitlesListSection" class="sub-settings-row hidden" style="margin-top: 10px; flex-direction: column; align-items: stretch; gap: 6px;">
+            <span class="sub-settings-label" style="margin-bottom: 2px;">Uploaded Subtitles in Room</span>
+            <div id="sharedSubtitlesListContainer" class="shared-subs-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnDoneMoreSubModal" class="btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movie Watch List Checklist Modal -->
+  <div id="watchlistModal" class="modal-backdrop hidden">
+    <div class="modal-card watchlist-card">
+      <div class="modal-header">
+        <div class="watchlist-header-left">
+          <h3>🎬 Movie Watch List</h3>
+          <span id="watchlistStats" class="watchlist-stats">0 planned &bull; 0 watched</span>
+        </div>
+        <button id="btnCloseWatchlistModal" class="btn-close" title="Close Watch List">&times;</button>
+      </div>
+
+      <div class="modal-body watchlist-body">
+        <!-- Add Movie Input Section -->
+        <div class="watchlist-add-section">
+          <form id="watchlistAddForm" class="watchlist-form">
+            <div class="watchlist-input-row">
+              <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="Add a movie to watch (plain text)..." autocomplete="off" required />
+              <button type="submit" id="btnWatchlistAdd" class="btn-primary">Add Movie</button>
+            </div>
+            <div class="watchlist-input-subrow">
+              <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="Tags (e.g. sci-fi, comedy, 90s - separated by comma or space)" autocomplete="off" />
+              <input type="text" id="watchlistInputNotes" class="watchlist-input-notes" placeholder="Optional notes / recommendation..." autocomplete="off" />
+            </div>
+          </form>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="watchlist-filter-bar">
+          <div class="watchlist-tabs">
+            <button type="button" id="tabWatchlistPlanned" class="watchlist-tab active" data-tab="planned">Planned (<span id="countPlanned">0</span>)</button>
+            <button type="button" id="tabWatchlistWatched" class="watchlist-tab" data-tab="watched">Watched (<span id="countWatched">0</span>)</button>
+            <button type="button" id="tabWatchlistAll" class="watchlist-tab" data-tab="all">All (<span id="countAll">0</span>)</button>
+          </div>
+          <div class="watchlist-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="watchlistSearchInput" placeholder="Filter movies or tags..." autocomplete="off" />
+            <button type="button" id="btnClearWatchlistSearch" class="btn-clear-watchlist-search hidden">&times;</button>
+          </div>
+        </div>
+
+        <!-- Tag Filter Chips Bar -->
+        <div id="watchlistTagChips" class="watchlist-tag-chips hidden">
+          <!-- Populated dynamically with clickable tag filters -->
+        </div>
+
+        <!-- Movie List Checklist Container -->
+        <div id="watchlistItemsList" class="watchlist-items-list" tabindex="0">
+          <!-- Movie items rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="modal-footer watchlist-footer">
+        <span class="watchlist-footer-hint">💡 Click checkbox to toggle watched. Click ✏️ to edit title, tags, or notes.</span>
+        <button type="button" id="btnCloseWatchlistFooter" class="btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watchlist Item Edit Inline/Modal Dialog -->
+  <div id="watchlistEditModal" class="modal-backdrop hidden" style="z-index: 210;">
+    <div class="modal-card watchlist-edit-card">
+      <div class="modal-header">
+        <h3>✏️ Edit Movie Entry</h3>
+        <button id="btnCloseWatchlistEditModal" class="btn-close" title="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="watchlistEditForm" class="watchlist-form">
+          <input type="hidden" id="editWatchlistItemId" />
+          <div class="setting-item">
+            <label for="editWatchlistTitle">Movie Title (Plain Text):</label>
+            <input type="text" id="editWatchlistTitle" required autocomplete="off" />
+          </div>
+          <div class="setting-item">
+            <label for="editWatchlistTags">Tags (comma or space separated):</label>
+            <input type="text" id="editWatchlistTags" placeholder="e.g. sci-fi, horror, classic" autocomplete="off" />
+            <span class="setting-help">Organize your movies with genre or theme tags.</span>
+          </div>
+          <div class="setting-item">
+            <label for="editWatchlistNotes">Notes / Description:</label>
+            <input type="text" id="editWatchlistNotes" placeholder="Optional notes (e.g. suggested by Alex)" autocomplete="off" />
+          </div>
+          <div class="watchlist-edit-actions">
+            <button type="button" id="btnCancelWatchlistEdit" class="btn-secondary">Cancel</button>
+            <button type="submit" id="btnSaveWatchlistEdit" class="btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Room Security PIN Modal -->
   <div id="pinModal" class="modal-backdrop">
     <div class="modal-card pin-card">
@@ -351,6 +668,25 @@
     </div>
   </div>
 
+  <!-- Bookmark Right-Click Context Menu -->
+  <div id="bookmarkContextMenu" class="bookmark-context-menu hidden">
+    <div id="bookmarkContextHeader" class="bookmark-context-header">Bookmark</div>
+    <button type="button" id="btnBookmarkContextJump" class="bookmark-context-item">
+      <span>▶</span> <span id="bookmarkContextJumpText">Jump to Time</span>
+    </button>
+    <button type="button" id="btnBookmarkContextDelete" class="bookmark-context-item danger">
+      <span>🗑️</span> <span>Delete Bookmark</span>
+    </button>
+  </div>
+
+  <!-- Lightbox Modal for Chat Images -->
+  <div id="lightboxModal" class="lightbox-modal hidden">
+    <div class="lightbox-wrapper">
+      <button id="btnCloseLightbox" class="lightbox-close" title="Close">&times;</button>
+      <img id="lightboxImage" class="lightbox-img" src="" alt="Enlarged screenshot" />
+    </div>
+  </div>
+
   <!-- Scripts (auto-loads latest CSS/JS from live backend tunnel when hosted on GitHub Pages) -->
   <script>
     (async function() {
@@ -381,7 +717,7 @@
         }
       }
 
-      for (const src of ["js/minimap.js?v=2.11", "js/player.js?v=2.11", "js/app.js?v=2.11"]) {
+      for (const src of ["js/minimap.js?v=2.50", "js/player.js?v=2.50", "js/app.js?v=2.50"]) {
         await new Promise((resolve) => {
           const s = document.createElement("script");
           s.src = src;
