@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <link rel="stylesheet" href="css/style.css?v=2.50">
+  <link rel="stylesheet" href="css/style.css?v=2.54">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -622,6 +622,23 @@
             <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="e.g. Inception, Spirited Away..." autocomplete="off" required />
           </div>
           <div class="setting-item">
+            <label for="watchlistInputLink">External Info / Description Link (Optional):</label>
+            <div class="input-with-button-row">
+              <input type="text" id="watchlistInputLink" class="watchlist-input-link" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
+              <button type="button" id="btnAutoFetchImdbAdd" class="btn-fetch-imdb" title="Auto-fetch poster and title from IMDb link">⚡ Fetch Poster</button>
+            </div>
+            <div id="imdbFetchStatusAdd" class="imdb-fetch-status hidden"></div>
+            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & title!</span>
+          </div>
+          <div class="setting-item">
+            <label for="watchlistInputPoster">Poster Image URL (Optional):</label>
+            <input type="url" id="watchlistInputPoster" class="watchlist-input-poster" placeholder="e.g. https://... or auto-filled from IMDb" autocomplete="off" />
+            <div id="posterPreviewAdd" class="watchlist-poster-preview hidden">
+              <img id="posterPreviewImgAdd" src="" alt="Poster preview" />
+              <span class="poster-preview-label">Poster Preview</span>
+            </div>
+          </div>
+          <div class="setting-item">
             <label for="watchlistInputTags">Tags (comma or space separated):</label>
             <input type="text" id="watchlistInputTags" class="watchlist-input-tags" placeholder="e.g. sci-fi, comedy, 90s" autocomplete="off" />
             <span class="setting-help">Organize movies by genre or topic.</span>
@@ -652,6 +669,23 @@
           <div class="setting-item">
             <label for="editWatchlistTitle">Movie Title (Plain Text):</label>
             <input type="text" id="editWatchlistTitle" required autocomplete="off" />
+          </div>
+          <div class="setting-item">
+            <label for="editWatchlistLink">External Info / Description Link (Optional):</label>
+            <div class="input-with-button-row">
+              <input type="text" id="editWatchlistLink" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
+              <button type="button" id="btnAutoFetchImdbEdit" class="btn-fetch-imdb" title="Auto-fetch poster from IMDb link">⚡ Fetch Poster</button>
+            </div>
+            <div id="imdbFetchStatusEdit" class="imdb-fetch-status hidden"></div>
+            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & details.</span>
+          </div>
+          <div class="setting-item">
+            <label for="editWatchlistPoster">Poster Image URL (Optional):</label>
+            <input type="url" id="editWatchlistPoster" placeholder="e.g. https://... or auto-filled from IMDb" autocomplete="off" />
+            <div id="posterPreviewEdit" class="watchlist-poster-preview hidden">
+              <img id="posterPreviewImgEdit" src="" alt="Poster preview" />
+              <span class="poster-preview-label">Poster Preview</span>
+            </div>
           </div>
           <div class="setting-item">
             <label for="editWatchlistTags">Tags (comma or space separated):</label>
@@ -719,6 +753,23 @@
     </button>
   </div>
 
+  <!-- Watchlist Movie Item Context Menu -->
+  <div id="watchlistContextMenu" class="watchlist-context-menu hidden">
+    <div id="watchlistContextHeader" class="watchlist-context-header">Movie Options</div>
+    <button type="button" id="btnWatchlistContextToggle" class="watchlist-context-item">
+      <span id="watchlistContextToggleIcon">✓</span> <span id="watchlistContextToggleText">Mark as Watched</span>
+    </button>
+    <a href="#" id="btnWatchlistContextLink" target="_blank" rel="noopener noreferrer" class="watchlist-context-item">
+      <span>🔗</span> <span id="watchlistContextLinkText">Open Link</span>
+    </a>
+    <button type="button" id="btnWatchlistContextEdit" class="watchlist-context-item">
+      <span>✏️</span> <span>Edit Movie Details</span>
+    </button>
+    <button type="button" id="btnWatchlistContextDelete" class="watchlist-context-item danger">
+      <span>🗑️</span> <span>Delete Movie</span>
+    </button>
+  </div>
+
   <!-- Lightbox Modal for Chat Images -->
   <div id="lightboxModal" class="lightbox-modal hidden">
     <div class="lightbox-wrapper">
@@ -757,7 +808,7 @@
         }
       }
 
-      for (const src of ["js/minimap.js?v=2.50", "js/player.js?v=2.50", "js/app.js?v=2.50"]) {
+      for (const src of ["js/minimap.js?v=2.54", "js/player.js?v=2.54", "js/app.js?v=2.54"]) {
         await new Promise((resolve) => {
           const s = document.createElement("script");
           s.src = src;
