@@ -67,13 +67,6 @@
                       <button type="button" id="btnLoadVideo" class="btn-primary">Load</button>
                     </div>
 
-                    <!-- Network File Share / Drive Browser Trigger -->
-                    <div class="source-extra-actions" style="margin-top: 8px; margin-bottom: 4px;">
-                      <button type="button" id="btnOpenBrowseModal" class="btn-browse-files" title="Browse network share folders or local drives for video files">
-                        <span>📁</span> <span>Browse Network Share & Files</span>
-                      </button>
-                    </div>
-
                     <div id="episodeGroup" class="episode-group hidden">
                       <label for="selectEpisode" class="episode-label">📑 Episode / Part:</label>
                       <select id="selectEpisode" class="select-episode" title="Select multi-part episode"></select>
@@ -772,47 +765,6 @@
     <button type="button" id="btnWatchlistContextDelete" class="watchlist-context-item danger">
       <span>🗑️</span> <span>Delete Movie</span>
     </button>
-  </div>
-
-  <!-- Network File Share / Drive Browser Modal -->
-  <div id="fileBrowserModal" class="modal-backdrop hidden" style="z-index: 220;">
-    <div class="modal-card file-browser-card">
-      <div class="modal-header">
-        <div class="file-browser-header-title">
-          <h3>📁 Network Share & File Browser</h3>
-          <span class="file-browser-subtitle">Stream video directly from your network share or local drives</span>
-        </div>
-        <button type="button" id="btnCloseFileBrowser" class="btn-close" title="Close">&times;</button>
-      </div>
-
-      <div class="modal-body file-browser-body">
-        <!-- Quick Jump Chips -->
-        <div class="file-browser-quick-bar">
-          <span class="quick-label">Quick Jump:</span>
-          <button type="button" class="btn-chip" data-path="\\emby\share">🌐 \\emby\share</button>
-          <button type="button" class="btn-chip" data-path="\\emby">🌐 \\emby</button>
-          <button type="button" class="btn-chip" data-path="C:\">💾 C:\</button>
-          <button type="button" id="btnFsHostPicker" class="btn-chip chip-action" title="Open native Windows file dialog on the host PC">🖥️ Host Native Picker</button>
-        </div>
-
-        <!-- Navigation bar -->
-        <div class="file-browser-nav-bar">
-          <button type="button" id="btnFsGoDrives" class="btn-toolbar btn-fs-nav" title="Back to Drives & Shares Root">🏠 Root</button>
-          <button type="button" id="btnFsGoUp" class="btn-toolbar btn-fs-nav" title="Up one folder">⬆️ Up</button>
-          <input type="text" id="inputFsCurrentPath" class="input-fs-path" placeholder="Type or paste folder path (e.g. \\emby\share or C:\)..." />
-          <button type="button" id="btnFsNavigate" class="btn-primary btn-fs-go">Go</button>
-        </div>
-
-        <!-- Entries List -->
-        <div id="fsEntriesList" class="file-browser-list">
-          <div class="file-browser-loading">Loading shares and drives...</div>
-        </div>
-
-        <div class="file-browser-footer">
-          <span id="fsStatusText" class="file-browser-status">Click a video (.mp4, .mkv, .webm) to stream to everyone</span>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Lightbox Modal for Chat Images -->
