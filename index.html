@@ -351,7 +351,7 @@
         <!-- Subs History Viewer Card (Below Chat) -->
         <div id="lyricsCard" class="sidebar-card lyrics-card">
           <div class="sidebar-card-header lyrics-header">
-            <div class="lyrics-header-left">
+            <div class="lyrics-header-left" id="lyricsHeaderTitleWrap" title="Click to collapse / expand Subtitles">
               <span class="lyrics-title">Subtitles</span>
             </div>
             <div class="lyrics-header-right">
@@ -363,6 +363,9 @@
               </button>
               <button id="btnRecenterLyrics" class="btn-recenter" title="Follow Line">
                 <span class="recenter-icon">🎯</span> <span id="followLineText">Follow Line</span>
+              </button>
+              <button type="button" id="btnToggleCollapseLyrics" class="btn-sub-viewer-toggle" title="Collapse Subtitles window">
+                <span class="collapse-icon">▾</span>
               </button>
             </div>
           </div>
@@ -619,13 +622,13 @@
             <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="e.g. Inception, Spirited Away..." autocomplete="off" required />
           </div>
           <div class="setting-item">
-            <label for="watchlistInputLink">External Info / Description Link (Optional):</label>
+            <label for="watchlistInputLink">Movie Stream or Info Link (Bilibili, Network Share, IMDb):</label>
             <div class="input-with-button-row">
-              <input type="text" id="watchlistInputLink" class="watchlist-input-link" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
+              <input type="text" id="watchlistInputLink" class="watchlist-input-link" placeholder="e.g. \\emby\share\Movies\movie.mkv, Bilibili URL / BV, or IMDb..." autocomplete="off" />
               <button type="button" id="btnAutoFetchImdbAdd" class="btn-fetch-imdb" title="Auto-fetch poster and title from IMDb link">⚡ Fetch Poster</button>
             </div>
             <div id="imdbFetchStatusAdd" class="imdb-fetch-status hidden"></div>
-            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & title!</span>
+            <span class="setting-help">Paste a network file share path, Bilibili link, or IMDb URL to stream directly or fetch poster.</span>
           </div>
           <div class="setting-item">
             <label for="watchlistInputPoster">Poster Image URL (Optional):</label>
@@ -668,13 +671,13 @@
             <input type="text" id="editWatchlistTitle" required autocomplete="off" />
           </div>
           <div class="setting-item">
-            <label for="editWatchlistLink">External Info / Description Link (Optional):</label>
+            <label for="editWatchlistLink">Movie Stream or Info Link (Bilibili, Network Share, IMDb):</label>
             <div class="input-with-button-row">
-              <input type="text" id="editWatchlistLink" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
+              <input type="text" id="editWatchlistLink" placeholder="e.g. \\emby\share\Movies\movie.mkv, Bilibili URL / BV, or IMDb..." autocomplete="off" />
               <button type="button" id="btnAutoFetchImdbEdit" class="btn-fetch-imdb" title="Auto-fetch poster from IMDb link">⚡ Fetch Poster</button>
             </div>
             <div id="imdbFetchStatusEdit" class="imdb-fetch-status hidden"></div>
-            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & details.</span>
+            <span class="setting-help">Paste a network file share path, Bilibili link, or IMDb URL to stream directly or fetch poster.</span>
           </div>
           <div class="setting-item">
             <label for="editWatchlistPoster">Poster Image URL (Optional):</label>
@@ -753,6 +756,9 @@
   <!-- Watchlist Movie Item Context Menu -->
   <div id="watchlistContextMenu" class="watchlist-context-menu hidden">
     <div id="watchlistContextHeader" class="watchlist-context-header">Movie Options</div>
+    <button type="button" id="btnWatchlistContextPlay" class="watchlist-context-item play-action">
+      <span>▶️</span> <span>Play this movie</span>
+    </button>
     <button type="button" id="btnWatchlistContextToggle" class="watchlist-context-item">
       <span id="watchlistContextToggleIcon">✓</span> <span id="watchlistContextToggleText">Mark as Watched</span>
     </button>
