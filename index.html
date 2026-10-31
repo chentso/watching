@@ -47,6 +47,12 @@
                 <span id="userAvatarBadge" class="avatar-badge">👤</span>
               </button>
 
+              <!-- Load File Direct Toolbar Button -->
+              <button type="button" id="btnToolbarLoadFile" class="btn-toolbar btn-load-file-toolbar" title="Open file picker to select and stream a video from your computer or network share">
+                <span>📂</span>
+                <span>Load File</span>
+              </button>
+
               <!-- Video Source Context Menu Button -->
               <div class="toolbar-menu-wrapper">
                 <button type="button" id="btnToolbarVideoSource" class="btn-toolbar btn-settings-menu btn-source-menu" title="Change Video Source / Load Bilibili Video">
@@ -62,9 +68,23 @@
                   </div>
 
                   <div class="settings-menu-body">
+                    <!-- Quick Load from File Button -->
+                    <div class="source-quick-actions" style="margin-bottom: 8px;">
+                      <button type="button" id="btnLoadFromFile" class="btn-primary btn-load-file" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 14px; font-weight: 600; font-size: 13px;" title="Open file picker to select a video from your computer or network share">
+                        <span>📂</span> <span>Select File from Disk / Share</span>
+                      </button>
+                    </div>
+
                     <div class="source-input-row">
-                      <input type="text" id="inputVideoQuery" placeholder="Paste Bilibili link or BV ID (e.g. BV1xx...)" autocomplete="off" />
+                      <input type="text" id="inputVideoQuery" placeholder="Or paste Bilibili link, URL, or path..." autocomplete="off" />
                       <button type="button" id="btnLoadVideo" class="btn-primary">Load</button>
+                    </div>
+
+                    <!-- Network File Share / Drive Browser Trigger -->
+                    <div class="source-extra-actions" style="margin-top: 6px; margin-bottom: 4px;">
+                      <button type="button" id="btnOpenBrowseModal" class="btn-browse-files" title="Browse network share folders or local drives for video files">
+                        <span>📁</span> <span>Browse Folders in Browser</span>
+                      </button>
                     </div>
 
                     <div id="episodeGroup" class="episode-group hidden">
@@ -765,6 +785,38 @@
     <button type="button" id="btnWatchlistContextDelete" class="watchlist-context-item danger">
       <span>🗑️</span> <span>Delete Movie</span>
     </button>
+  </div>
+
+  <!-- Network File Share / Drive Browser Modal -->
+  <div id="fileBrowserModal" class="modal-backdrop hidden" style="z-index: 220;">
+    <div class="modal-card file-browser-card">
+      <div class="modal-header">
+        <div class="file-browser-header-title">
+          <h3>📁 Network Share & File Browser</h3>
+          <span class="file-browser-subtitle">Stream video directly from your network share or local drives</span>
+        </div>
+        <button type="button" id="btnCloseFileBrowser" class="btn-close" title="Close">&times;</button>
+      </div>
+
+      <div class="modal-body file-browser-body">
+        <!-- Navigation bar -->
+        <div class="file-browser-nav-bar">
+          <button type="button" id="btnFsGoDrives" class="btn-toolbar btn-fs-nav" title="Back to Drives List">🏠 Drives</button>
+          <button type="button" id="btnFsGoUp" class="btn-toolbar btn-fs-nav" title="Up one folder">⬆️ Up</button>
+          <input type="text" id="inputFsCurrentPath" class="input-fs-path" placeholder="Type or paste folder path (e.g. \\SERVER\share or Z:\)..." />
+          <button type="button" id="btnFsNavigate" class="btn-primary btn-fs-go">Go</button>
+        </div>
+
+        <!-- Entries List -->
+        <div id="fsEntriesList" class="file-browser-list">
+          <div class="file-browser-loading">Loading drives...</div>
+        </div>
+
+        <div class="file-browser-footer">
+          <span id="fsStatusText" class="file-browser-status">Select a video (.mp4, .mkv, .webm) to stream to everyone</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Lightbox Modal for Chat Images -->
