@@ -174,6 +174,8 @@
                     <div class="settings-menu-row">
                       <label for="selectSubSize" class="settings-row-label">Sub Size</label>
                       <select id="selectSubSize" class="select-toolbar select-settings" title="Subtitle Font Size">
+                        <option value="12px">12px</option>
+                        <option value="14px">14px</option>
                         <option value="18px">18px</option>
                         <option value="22px">22px</option>
                         <option value="26px" selected>26px</option>
@@ -238,12 +240,7 @@
             <div id="danmakuOverlay" class="danmaku-overlay"></div>
 
             <!-- Subtitle Text Overlay on Video -->
-            <div id="subtitleOverlay" class="subtitle-overlay hidden">
-              <div id="subtitleText" class="subtitle-text">
-                <div id="subtitleTop" class="subtitle-line subtitle-top"></div>
-                <div id="subtitleBottom" class="subtitle-line subtitle-bottom"></div>
-              </div>
-            </div>
+            <div id="subtitleOverlay" class="subtitle-overlay hidden"><div id="subtitleText" class="subtitle-text"><div id="subtitleTop" class="subtitle-line subtitle-top hidden"></div><div id="subtitleBottom" class="subtitle-line subtitle-bottom hidden"></div></div></div>
 
             <!-- Waiting for Slowest Overlay -->
             <div id="waitingOverlay" class="waiting-overlay hidden">
