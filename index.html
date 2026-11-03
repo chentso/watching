@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <link rel="stylesheet" href="css/style.css?v=2.54">
+  <link rel="stylesheet" href="css/style.css?v=2.56">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -36,6 +36,11 @@
                   Bookmark (Shared)
                 </button>
               </div>
+
+              <!-- Screenshot & Annotate Button -->
+              <button type="button" id="btnTakeScreenshot" class="btn-toolbar btn-screenshot" title="Capture & Annotate Screenshot (Alt+S or Ctrl+Shift+S)">
+                <span>📸</span> <span>Screenshot</span>
+              </button>
             </div>
 
             <div class="toolbar-right">
@@ -232,7 +237,7 @@
 
           <!-- Video Player Wrapper -->
           <div class="player-wrapper">
-            <video id="videoPlayer" playsinline preload="auto">
+            <video id="videoPlayer" playsinline preload="auto" crossorigin="anonymous">
               Your browser does not support the video tag.
             </video>
 
@@ -622,13 +627,18 @@
             <input type="text" id="watchlistInputTitle" class="watchlist-input-title" placeholder="e.g. Inception, Spirited Away..." autocomplete="off" required />
           </div>
           <div class="setting-item">
-            <label for="watchlistInputLink">Movie Stream or Info Link (Bilibili, Network Share, IMDb):</label>
+            <label for="watchlistInputVideo">Video Stream / File Path (Optional):</label>
+            <input type="text" id="watchlistInputVideo" class="watchlist-input-video" placeholder="e.g. \\emby\share\Movies\movie.mkv or Bilibili URL / BV..." autocomplete="off" />
+            <span class="setting-help">Network share path, Bilibili URL/BV, or web stream used when clicking "Play this movie".</span>
+          </div>
+          <div class="setting-item">
+            <label for="watchlistInputLink">IMDb / Movie Info Link (Optional):</label>
             <div class="input-with-button-row">
-              <input type="text" id="watchlistInputLink" class="watchlist-input-link" placeholder="e.g. \\emby\share\Movies\movie.mkv, Bilibili URL / BV, or IMDb..." autocomplete="off" />
+              <input type="text" id="watchlistInputLink" class="watchlist-input-link" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
               <button type="button" id="btnAutoFetchImdbAdd" class="btn-fetch-imdb" title="Auto-fetch poster and title from IMDb link">⚡ Fetch Poster</button>
             </div>
             <div id="imdbFetchStatusAdd" class="imdb-fetch-status hidden"></div>
-            <span class="setting-help">Paste a network file share path, Bilibili link, or IMDb URL to stream directly or fetch poster.</span>
+            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & title!</span>
           </div>
           <div class="setting-item">
             <label for="watchlistInputPoster">Poster Image URL (Optional):</label>
@@ -671,13 +681,18 @@
             <input type="text" id="editWatchlistTitle" required autocomplete="off" />
           </div>
           <div class="setting-item">
-            <label for="editWatchlistLink">Movie Stream or Info Link (Bilibili, Network Share, IMDb):</label>
+            <label for="editWatchlistVideo">Video Stream / File Path (Optional):</label>
+            <input type="text" id="editWatchlistVideo" placeholder="e.g. \\emby\share\Movies\movie.mkv or Bilibili URL / BV..." autocomplete="off" />
+            <span class="setting-help">Network share path, Bilibili URL/BV, or web stream used when clicking "Play this movie".</span>
+          </div>
+          <div class="setting-item">
+            <label for="editWatchlistLink">IMDb / Movie Info Link (Optional):</label>
             <div class="input-with-button-row">
-              <input type="text" id="editWatchlistLink" placeholder="e.g. \\emby\share\Movies\movie.mkv, Bilibili URL / BV, or IMDb..." autocomplete="off" />
+              <input type="text" id="editWatchlistLink" placeholder="e.g. imdb.com/title/tt1375666/ or douban.com" autocomplete="off" />
               <button type="button" id="btnAutoFetchImdbEdit" class="btn-fetch-imdb" title="Auto-fetch poster from IMDb link">⚡ Fetch Poster</button>
             </div>
             <div id="imdbFetchStatusEdit" class="imdb-fetch-status hidden"></div>
-            <span class="setting-help">Paste a network file share path, Bilibili link, or IMDb URL to stream directly or fetch poster.</span>
+            <span class="setting-help">Paste an IMDb link to automatically retrieve the movie poster & details.</span>
           </div>
           <div class="setting-item">
             <label for="editWatchlistPoster">Poster Image URL (Optional):</label>
@@ -773,6 +788,126 @@
     </button>
   </div>
 
+  <!-- Windows Win+Shift+S Style Snip Crop Overlay -->
+  <div id="screenshotSnipOverlay" class="screenshot-snip-overlay hidden">
+    <canvas id="snipCanvas" class="snip-canvas"></canvas>
+
+    <!-- Top Floating Snipping Bar -->
+    <div class="snip-floating-bar">
+      <div class="snip-mode-group">
+        <button type="button" id="btnSnipRect" class="btn-snip-mode active" title="Rectangular Snip (Drag on video)">
+          <span>🔲</span> <span>Snip Region</span>
+        </button>
+        <button type="button" id="btnSnipFull" class="btn-snip-mode" title="Capture Entire Video Frame">
+          <span>🖥️</span> <span>Full Video</span>
+        </button>
+      </div>
+      <div class="snip-divider"></div>
+      <button type="button" id="btnCancelSnip" class="btn-snip-cancel" title="Cancel Snip (Esc)">
+        <span>✕</span>
+      </button>
+    </div>
+
+    <div class="snip-floating-hint">
+      <span>Drag across the video to crop &bull; Esc to cancel</span>
+    </div>
+  </div>
+
+  <!-- Screenshot & Annotation Drawing Modal (Windows Snipping Tool Style) -->
+  <div id="screenshotModal" class="modal-backdrop screenshot-modal-backdrop hidden">
+    <div class="modal-card screenshot-card">
+      <div class="modal-header screenshot-header">
+        <div class="screenshot-header-title">
+          <span class="screenshot-title-icon">📸</span>
+          <span class="screenshot-title-text">Annotate Frame</span>
+        </div>
+
+        <!-- Annotation Tools Toolbar -->
+        <div class="screenshot-toolbar">
+          <div class="screenshot-tool-group">
+            <button type="button" id="btnScreenshotRecrop" class="btn-annotation-action" title="Re-crop original video frame">
+              <span>✂️</span> <span>Crop</span>
+            </button>
+          </div>
+
+          <div class="screenshot-divider"></div>
+
+          <div class="screenshot-tool-group">
+            <button type="button" class="btn-annotation-tool active" data-tool="pen" title="Pen (P)">
+              <span>✏️</span> <span>Pen</span>
+            </button>
+            <button type="button" class="btn-annotation-tool" data-tool="highlighter" title="Highlighter (H)">
+              <span>🖍️</span> <span>Highlight</span>
+            </button>
+            <button type="button" class="btn-annotation-tool" data-tool="arrow" title="Arrow (A)">
+              <span>↗️</span> <span>Arrow</span>
+            </button>
+            <button type="button" class="btn-annotation-tool" data-tool="rect" title="Rectangle (R)">
+              <span>🔲</span> <span>Box</span>
+            </button>
+            <button type="button" class="btn-annotation-tool" data-tool="text" title="Text (T)">
+              <span>🔤</span> <span>Text</span>
+            </button>
+          </div>
+
+          <div class="screenshot-divider"></div>
+
+          <!-- Color Swatches -->
+          <div class="screenshot-color-palette">
+            <button type="button" class="color-dot active" style="--dot-color: #ef4444;" data-color="#ef4444" title="Red"></button>
+            <button type="button" class="color-dot" style="--dot-color: #facc15;" data-color="#facc15" title="Yellow"></button>
+            <button type="button" class="color-dot" style="--dot-color: #22c55e;" data-color="#22c55e" title="Green"></button>
+            <button type="button" class="color-dot" style="--dot-color: #00aeec;" data-color="#00aeec" title="Blue"></button>
+            <button type="button" class="color-dot" style="--dot-color: #a855f7;" data-color="#a855f7" title="Purple"></button>
+            <button type="button" class="color-dot" style="--dot-color: #ffffff;" data-color="#ffffff" title="White"></button>
+            <button type="button" class="color-dot" style="--dot-color: #000000;" data-color="#000000" title="Black"></button>
+          </div>
+
+          <div class="screenshot-divider"></div>
+
+          <!-- Stroke Sizes -->
+          <div class="screenshot-tool-group stroke-sizes">
+            <button type="button" class="btn-stroke-size" data-size="3" title="Thin (3px)">●</button>
+            <button type="button" class="btn-stroke-size active" data-size="6" title="Medium (6px)">●</button>
+            <button type="button" class="btn-stroke-size" data-size="12" title="Thick (12px)">●</button>
+          </div>
+
+          <div class="screenshot-divider"></div>
+
+          <!-- Undo & Clear -->
+          <div class="screenshot-tool-group">
+            <button type="button" id="btnScreenshotUndo" class="btn-annotation-action" title="Undo Last Stroke (Ctrl+Z)" disabled>
+              <span>↩️</span>
+            </button>
+            <button type="button" id="btnScreenshotClear" class="btn-annotation-action" title="Clear All Annotations">
+              <span>🗑️</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" id="btnCloseScreenshotModal" class="btn-close" title="Cancel & Close">&times;</button>
+      </div>
+
+      <!-- Canvas Area -->
+      <div class="screenshot-canvas-wrapper" id="screenshotCanvasWrapper">
+        <canvas id="screenshotCanvas" class="screenshot-canvas"></canvas>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="modal-footer screenshot-footer">
+        <div class="screenshot-footer-hint">
+          <span>💡 Draw over frame &bull; <strong>Ctrl+Z</strong> undo &bull; <strong>Enter</strong> done</span>
+        </div>
+        <div class="screenshot-footer-buttons">
+          <button type="button" id="btnCancelScreenshot" class="btn-secondary">Cancel</button>
+          <button type="button" id="btnDoneScreenshot" class="btn-primary btn-done-screenshot">
+            <span>✓</span> <span>Done & Paste to Chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Lightbox Modal for Chat Images -->
   <div id="lightboxModal" class="lightbox-modal hidden">
     <div class="lightbox-wrapper">
@@ -811,7 +946,7 @@
         }
       }
 
-      for (const src of ["js/minimap.js?v=2.54", "js/player.js?v=2.54", "js/app.js?v=2.54"]) {
+      for (const src of ["js/minimap.js?v=2.56", "js/player.js?v=2.56", "js/app.js?v=2.56"]) {
         await new Promise((resolve) => {
           const s = document.createElement("script");
           s.src = src;
