@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FridayMovieTime</title>
-  <link rel="stylesheet" href="css/style.css?v=2.56">
+  <link rel="stylesheet" href="css/style.css?v=2.58">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -70,6 +70,13 @@
                     <div class="source-input-row">
                       <input type="text" id="inputVideoQuery" placeholder="Paste Bilibili link, URL, or file path..." autocomplete="off" />
                       <button type="button" id="btnLoadVideo" class="btn-primary">Load</button>
+                    </div>
+
+                    <div class="source-quick-btns localhost-only" id="sourceQuickBtns">
+                      <button type="button" id="btnOpenEmbyModal" class="btn-source-emby localhost-only" title="Browse and Stream from Emby Server">
+                        <span class="source-quick-icon">🍿</span>
+                        <span class="source-quick-text">Emby Media Server</span>
+                      </button>
                     </div>
 
                     <div id="episodeGroup" class="episode-group hidden">
@@ -721,6 +728,80 @@
   </div>
 
 
+  <!-- Emby Media Server Modal -->
+  <div id="embyModal" class="modal-backdrop hidden" style="z-index: 220;">
+    <div class="modal-card emby-card">
+      <div class="modal-header">
+        <div class="emby-header-title">
+          <span class="emby-logo-icon">🍿</span>
+          <h3>Emby Media Server</h3>
+          <span id="embyStatusBadge" class="status-pill status-disconnected">Disconnected</span>
+        </div>
+        <div class="emby-header-actions">
+          <button type="button" id="btnToggleEmbySettings" class="btn-icon-subtle" title="Configure Emby Connection">⚙️</button>
+          <button type="button" id="btnCloseEmbyModal" class="btn-close-settings" title="Close">&times;</button>
+        </div>
+      </div>
+
+      <!-- Emby Settings / Connection Configuration Panel -->
+      <div id="embySettingsPanel" class="emby-settings-panel hidden">
+        <div class="emby-settings-inner">
+          <span class="emby-settings-heading">Emby Server Configuration</span>
+          <p class="emby-settings-desc">Connect FridayMovieTime to your Emby server to stream directly without network shares.</p>
+          <div class="setting-item">
+            <label for="embyServerUrlInput">Server URL (LAN or Domain):</label>
+            <input type="text" id="embyServerUrlInput" placeholder="http://192.168.1.50:8096 or http://emby:8096" autocomplete="off" />
+            <span class="setting-help">Internal IP/hostname or public URL (e.g. http://emby:8096)</span>
+          </div>
+          <div class="setting-item">
+            <label for="embyApiKeyInput">Emby API Key:</label>
+            <input type="password" id="embyApiKeyInput" placeholder="Paste Emby API Key..." autocomplete="off" />
+            <span class="setting-help">Found in Emby Dashboard ➔ Advanced ➔ API Keys.</span>
+          </div>
+          <div class="emby-settings-actions">
+            <button type="button" id="btnCancelEmbySettings" class="btn-secondary">Cancel</button>
+            <button type="button" id="btnSaveEmbySettings" class="btn-primary">Connect & Save</button>
+          </div>
+          <div id="embySettingsMsg" class="emby-settings-msg hidden"></div>
+        </div>
+      </div>
+
+      <!-- Emby Browser Body -->
+      <div id="embyBrowserBody" class="modal-body emby-browser-body">
+        <div class="emby-toolbar">
+          <div id="embyLibraryTabs" class="emby-library-tabs">
+            <button type="button" class="emby-tab active" data-lib-id="all">All Media</button>
+          </div>
+          <div class="emby-search-wrap">
+            <input type="text" id="embySearchInput" placeholder="🔍 Search Emby movies & series..." autocomplete="off" />
+            <button type="button" id="btnClearEmbySearch" class="btn-clear-search hidden">&times;</button>
+          </div>
+        </div>
+
+        <div id="embyLoadingSpinner" class="emby-loading-spinner hidden">
+          <div class="spinner"></div>
+          <span>Loading Emby library...</span>
+        </div>
+
+        <div id="embyItemsGrid" class="emby-items-grid">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div id="embyEmptyState" class="emby-empty-state hidden">
+          <span class="emby-empty-icon">🍿</span>
+          <p id="embyEmptyText">No videos found. Check your search query or connect your Emby server.</p>
+          <button type="button" id="btnConfigureEmbyPrompt" class="btn-primary btn-small">Configure Emby</button>
+        </div>
+      </div>
+
+      <div class="modal-footer emby-footer">
+        <span class="emby-footer-tip">💡 Click any item to stream into the watch party with synced playback and subtitles.</span>
+        <button type="button" id="btnCloseEmbyFooter" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Room Security PIN Modal -->
   <div id="pinModal" class="modal-backdrop">
     <div class="modal-card pin-card">
@@ -946,7 +1027,7 @@
         }
       }
 
-      for (const src of ["js/minimap.js?v=2.56", "js/player.js?v=2.56", "js/app.js?v=2.56"]) {
+      for (const src of ["js/minimap.js?v=2.58", "js/player.js?v=2.58", "js/app.js?v=2.58"]) {
         await new Promise((resolve) => {
           const s = document.createElement("script");
           s.src = src;
